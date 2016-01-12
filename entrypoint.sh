@@ -15,7 +15,7 @@ case ${1} in
         fi
         if [[ -n $ATTRIBUTE_FIX_LIST ]] && [[ $ATTRIBUTE_AUTO_FIX_ENABLE != false ]]; then
             cd $TEMPLATES_DIR 
-            find . -type f |
+            find . -type f -o -type d |
             while read file; do
                 stat -c "%a	%U	%G	$(realpath $file)" $file >> ${ATTRIBUTE_FIX_LIST}.add
             done
