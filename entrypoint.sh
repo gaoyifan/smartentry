@@ -17,7 +17,7 @@ case ${1} in
             cd $TEMPLATES_DIR 
             find . -type f -o -type d |
             while read file; do
-                stat -c "%a	%U	%G	$(realpath $file)" $file >> ${ATTRIBUTE_FIX_LIST}.add
+                [[ -e $file ]] && stat -c "%a	%U	%G	$(realpath $file)" $file >> ${ATTRIBUTE_FIX_LIST}.add
             done
             cat ${ATTRIBUTE_FIX_LIST} >> ${ATTRIBUTE_FIX_LIST}.add
             mv ${ATTRIBUTE_FIX_LIST}.add ${ATTRIBUTE_FIX_LIST}
