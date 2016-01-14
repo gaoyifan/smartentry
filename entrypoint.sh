@@ -23,6 +23,9 @@ case ${1} in
             cat ${ATTRIBUTE_FIX_LIST} >> ${ATTRIBUTE_FIX_LIST}.add
             mv ${ATTRIBUTE_FIX_LIST}.add ${ATTRIBUTE_FIX_LIST}
         fi
+        if [[ -f $BUILD_SCRIPT ]]; then
+            source $BUILD_SCRIPT
+        fi
         ;;
     *)
         [[ -f $DEFAULT_ENV ]] && source $DEFAULT_ENV
