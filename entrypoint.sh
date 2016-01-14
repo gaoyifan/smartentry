@@ -10,7 +10,8 @@ case ${1} in
             TEMPLATE_VARIABLES=$(find . -type f -exec grep -P -o '(?<={{).+?(?=}})' {} \; | xargs -n 1 echo | sort | uniq ) 
             find . -type f | 
             while read file; do
-                md5sum ${file#*.} >> $MD5_CHECKLIST
+                file_dst=${file#*.} ;
+                [[ -f $file_dst ]] && md5sum $file_dst >> $MD5_CHECKLIST
             done
         fi
         if [[ -n $ATTRIBUTE_FIX_LIST ]] && [[ $ATTRIBUTE_AUTO_FIX_ENABLE != false ]]; then
