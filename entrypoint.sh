@@ -21,7 +21,7 @@ case ${1} in
                 file_dst=${file#*.} ;
                 [[ -e $file_dst ]] && stat -c "%a	%U	%G	$(realpath $file_dst)" $file_dst >> ${ATTRIBUTE_FIX_LIST}.add
             done
-            cat ${ATTRIBUTE_FIX_LIST} >> ${ATTRIBUTE_FIX_LIST}.add
+            [[ -f ${ATTRIBUTE_FIX_LIST} ]] && cat ${ATTRIBUTE_FIX_LIST} >> ${ATTRIBUTE_FIX_LIST}.add
             mv ${ATTRIBUTE_FIX_LIST}.add ${ATTRIBUTE_FIX_LIST}
         fi
         if [[ -f $BUILD_SCRIPT ]]; then
