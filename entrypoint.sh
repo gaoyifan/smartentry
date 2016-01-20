@@ -4,9 +4,11 @@
 
 case ${1} in
     build)
+        if [[ -f $BUILD_SCRIPT ]]; then
+            source $BUILD_SCRIPT
+        fi
         if [[ -n $MD5_CHECKLIST ]] ; then
             cd $TEMPLATES_DIR
-            find . -mindepth 1 -type d | while read dir; do mkdir -p ${dir#*.} ; done
             TEMPLATE_VARIABLES=$(find . -type f -exec grep -P -o '(?<={{).+?(?=}})' {} \; | xargs -n 1 echo | sort | uniq ) 
             find . -type f | 
             while read file; do
@@ -23,9 +25,6 @@ case ${1} in
             done
             [[ -f ${ATTRIBUTE_FIX_LIST} ]] && cat ${ATTRIBUTE_FIX_LIST} >> ${ATTRIBUTE_FIX_LIST}.add
             mv ${ATTRIBUTE_FIX_LIST}.add ${ATTRIBUTE_FIX_LIST}
-        fi
-        if [[ -f $BUILD_SCRIPT ]]; then
-            source $BUILD_SCRIPT
         fi
         ;;
     *)
