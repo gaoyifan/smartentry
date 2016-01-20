@@ -7,6 +7,7 @@ case ${1} in
         if [[ -f $BUILD_SCRIPT ]]; then
             source $BUILD_SCRIPT
         fi
+	set +e
         if [[ -n $MD5_CHECKLIST ]] ; then
             cd $TEMPLATES_DIR
             TEMPLATE_VARIABLES=$(find . -type f -exec grep -P -o '(?<={{).+?(?=}})' {} \; | xargs -n 1 echo | sort | uniq ) 
