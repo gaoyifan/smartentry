@@ -49,6 +49,12 @@ case ${1} in
                     [[ -n $variable ]] && eval sed -i "s/{{$variable}}/\${$variable}/g" $file_dst ;
                 done
             done
+
+            find . -type l |
+            while read link; do
+                link_dst=${link#*.}
+                cp -d $link $link_dst
+            done
         fi
 
         if [[ -f $ATTRIBUTE_FIX_LIST ]] && [[ $APPLY_ATTRIBUTE_FIX_ENABLE != false ]]; then
