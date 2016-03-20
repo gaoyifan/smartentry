@@ -2,6 +2,8 @@
 
 [[ $DEBUG == true ]] && set -x
 
+PWD_ORGI=$PWD
+
 case ${1} in
     build)
         if [[ -f $BUILD_SCRIPT ]]; then
@@ -62,6 +64,7 @@ case ${1} in
             cat $ATTRIBUTE_FIX_LIST | awk '{ printf("chown %s:%s %s\n",$2,$3,$4); }' | sh
         fi
 
+        cd $PWD_ORGI
         exec "$@"
         ;;
 esac
