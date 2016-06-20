@@ -6,11 +6,12 @@ PWD_ORGI=$PWD
 
 case ${1} in
     build)
+	# run user defined script
         if [[ -f $BUILD_SCRIPT ]]; then
             source $BUILD_SCRIPT
         fi
 	set +e
-        if [[ -n $MD5_CHECKLIST ]] ; then
+        if [[ -d $TEMPLATES_DIR ]] && [[ -n $MD5_CHECKLIST ]] ; then
             cd $TEMPLATES_DIR
             TEMPLATE_VARIABLES=$(find . -type f -exec grep -P -o '(?<={{).+?(?=}})' {} \; | xargs -n 1 echo | sort | uniq ) 
             find . -type f | 
@@ -19,7 +20,7 @@ case ${1} in
                 [[ -f $file_dst ]] && md5sum $file_dst >> $MD5_CHECKLIST
             done
         fi
-        if [[ -n $ATTRIBUTE_FIX_LIST ]] && [[ $ATTRIBUTE_AUTO_FIX_ENABLE != false ]]; then
+        if [[ -d $TEMPLATES_DIR ]] && [[ -n $ATTRIBUTE_FIX_LIST ]] && [[ $ATTRIBUTE_AUTO_FIX_ENABLE != false ]]; then
             cd $TEMPLATES_DIR 
             find . -type f -o -type d |
             while read file; do
