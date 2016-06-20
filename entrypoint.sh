@@ -49,7 +49,8 @@ case ${1} in
                 fi
                 [[ -n $TEMPLATE_VARIABLES ]] && echo $TEMPLATE_VARIABLES | xargs -n 1 echo | 
                 while read variable; do
-                    eval sed -i "s/{{$variable}}/\${$variable}/g" $file_dst ;
+                    variable_literal=$(eval echo \${$variable} | sed 's:/:\\/:g')
+                    sed -i "s/{{$variable}}/$variable_literal/g" $file_dst ;
                 done
             done
 
