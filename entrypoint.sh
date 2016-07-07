@@ -10,7 +10,6 @@ CHECKLIST_FILE=${CHECKLIST_FILE:-"$ASSETS_DIR/checklist.md5"}
 DEFAULT_ENV_FILE=${DEFAULT_ENV_FILE:-"$ASSETS_DIR/default_env.sh"}
 CHMOD_FILE=${CHMOD_FILE:-"$ASSETS_DIR/chmod.list"}
 BUILD_SCRIPT=${BUILD_SCRIPT:-"$ASSETS_DIR/build.sh"}
-VOLUME_INIT_LIST=${VOLUME_INIT_LIST:-"$ASSETS_DIR/volume_init.list"}
 PRE_RUN_SCRIPT=${PRERUN_SCRIPT:="$ASSETS_DIR/pre_run.sh"}
 VOLUMES_LIST=${VOLUMES_LIST:="$ASSETS_DIR/volumes.list"}
 VOLUMES_ARCHIVE=${VOLUMES_ARCHIVE:="$ASSETS_DIR/volumes.tar"}
@@ -51,7 +50,7 @@ case ${1} in
         fi
 
         # init volume data
-        if [[ -f $VOLUMES_LIST ]] && [[ $INIT_VOLUMES_DATA_ENABLE != false ]]; then
+        if [[ -f $VOLUMES_LIST ]]; then
             echo '>> save volume data'
             cat $VOLUMES_LIST | xargs tar -rf $VOLUMES_ARCHIVE
         fi
