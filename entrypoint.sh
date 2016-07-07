@@ -66,7 +66,7 @@ case ${1} in
         fi
 
         # init volume data
-        if [[ -f $VOLUMES_ARCHIVE ]] && [[ $INIT_VOLUMES_DATA_ENABLE != false ]]; then
+        if [[ -f $VOLUMES_ARCHIVE ]] && [[ $INIT_VOLUMES_DATA_ENABLE == true ]]; then
             echo '>> init volume data'
             tar -C / -xf $VOLUMES_ARCHIVE
             rm $VOLUMES_ARCHIVE
