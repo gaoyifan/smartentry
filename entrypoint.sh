@@ -13,6 +13,7 @@ BUILD_SCRIPT=${BUILD_SCRIPT:-"$ASSETS_DIR/build.sh"}
 PRE_RUN_SCRIPT=${PRERUN_SCRIPT:="$ASSETS_DIR/pre_run.sh"}
 VOLUMES_LIST=${VOLUMES_LIST:="$ASSETS_DIR/volumes.list"}
 VOLUMES_ARCHIVE=${VOLUMES_ARCHIVE:="$ASSETS_DIR/volumes.tar"}
+INITIALIZED_FLAG=${INITIALIZED_FLAG:="$ASSERS_DIR/initialized.flag"}
 
 ENTRY_PROMPT=${ENTRY_PROMPT:="entrypoint>> "}
 
@@ -66,11 +67,18 @@ case ${1} in
             source $DEFAULT_ENV_FILE
         fi
 
+        # set env: HAVE_INITIALIZED
+        if [[ -f $INITIALIZED_FLAG ]]; then
+            export HAVE_INITIALIZED=true
+        else
+            export HAVE_INITIALIZED=false
+            touch $INITIALIZED_FLAG
+        fi
+
         # init volume data
-        if [[ -f $VOLUMES_ARCHIVE ]] && [[ $INIT_VOLUMES_DATA_ENABLE == true ]]; then
+        if [[ -f $VOLUMES_ARCHIVE ]] && [[ $INIT_VOLUMES_DATA_ENABLE == true ]] && [[ $HAVE_INITIALIZED == false ]]; then
             echo "$ENTRY_PROMPT init volume data"
             tar -C / -xf $VOLUMES_ARCHIVE
-            rm $VOLUMES_ARCHIVE
         fi
 
         # patch file; apply template
