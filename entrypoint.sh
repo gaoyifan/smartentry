@@ -15,7 +15,7 @@ VOLUMES_LIST=${VOLUMES_LIST:="$ASSETS_DIR/volumes.list"}
 VOLUMES_ARCHIVE=${VOLUMES_ARCHIVE:="$ASSETS_DIR/volumes.tar"}
 INITIALIZED_FLAG=${INITIALIZED_FLAG:="$ASSERS_DIR/initialized.flag"}
 
-ENTRY_PROMPT=${ENTRY_PROMPT:="entrypoint>> "}
+ENTRY_PROMPT=${ENTRY_PROMPT:="entrypoint> "}
 
 case ${1} in
     build)
