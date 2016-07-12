@@ -21,7 +21,7 @@ case ${1} in
     build)
         # run user defined script
         if [[ -f $BUILD_SCRIPT ]]; then
-        echo "$ENTRY_PROMPT running build.sh"
+            echo "$ENTRY_PROMPT running build.sh"
             source $BUILD_SCRIPT
         fi
 
@@ -29,7 +29,7 @@ case ${1} in
 
         # generate MD5 list for target files of rootfs, to keep user's modification when docker restart 
         if [[ -d $ROOTFS_DIR ]] && [[ $KEEP_USER_MODIFICATION_ENABLE != false ]] ; then
-        echo "$ENTRY_PROMPT generate MD5 list"
+            echo "$ENTRY_PROMPT generate MD5 list"
             cd $ROOTFS_DIR
             TEMPLATE_VARIABLES=$(find . -type f -exec grep -P -o '(?<={{).+?(?=}})' {} \; | xargs -n 1 echo | sort | uniq ) 
             find . -type f | 
@@ -121,6 +121,23 @@ case ${1} in
         if [[ -f $PRE_RUN_SCRIPT ]]; then
             echo "$ENTRY_PROMPT pre-running script"
             source $PRE_RUN_SCRIPT
+        fi
+
+        # unset all environment varibles
+        if [[ $UNSET_ENVIRONMENT_VARIBLES != false ]]; then
+            TERM_ORIG=$TERM
+            PATH_ORIG=$PATH
+            HOME_ORIG=$HOME
+            SHLVL_ORIG=$SHLVL
+
+            for i in $(env | awk -F"=" '{print $1}') ; do
+                unset $i; 
+            done
+            
+            export TERM=$TERM_ORIG
+            export PATH=$PATH_ORIG
+            export HOME=$PATH_ORIG
+            export SHLVL=$SHLVL_ORIG
         fi
 
         # main program
