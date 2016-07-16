@@ -4,16 +4,16 @@
 
 PWD_ORGI=$PWD
 
-ASSETS_DIR=${ASSETS_DIR:-"/etc/docker-assets"}
-ROOTFS_DIR=${ROOTFS_DIR:-"$ASSETS_DIR/rootfs"}
-CHECKLIST_FILE=${CHECKLIST_FILE:-"$ASSETS_DIR/checklist.md5"}
-DEFAULT_ENV_FILE=${DEFAULT_ENV_FILE:-"$ASSETS_DIR/default_env.sh"}
-CHMOD_FILE=${CHMOD_FILE:-"$ASSETS_DIR/chmod.list"}
-BUILD_SCRIPT=${BUILD_SCRIPT:-"$ASSETS_DIR/build.sh"}
-PRE_RUN_SCRIPT=${PRERUN_SCRIPT:="$ASSETS_DIR/pre_run.sh"}
-VOLUMES_LIST=${VOLUMES_LIST:="$ASSETS_DIR/volumes.list"}
-VOLUMES_ARCHIVE=${VOLUMES_ARCHIVE:="$ASSETS_DIR/volumes.tar"}
-INITIALIZED_FLAG=${INITIALIZED_FLAG:="$ASSERS_DIR/initialized.flag"}
+export ASSETS_DIR=${ASSETS_DIR:-"/etc/docker-assets"}
+export ROOTFS_DIR=${ROOTFS_DIR:-"$ASSETS_DIR/rootfs"}
+export CHECKLIST_FILE=${CHECKLIST_FILE:-"$ASSETS_DIR/checklist.md5"}
+export DEFAULT_ENV_FILE=${DEFAULT_ENV_FILE:-"$ASSETS_DIR/default_env.sh"}
+export CHMOD_FILE=${CHMOD_FILE:-"$ASSETS_DIR/chmod.list"}
+export BUILD_SCRIPT=${BUILD_SCRIPT:-"$ASSETS_DIR/build"}
+export PRE_RUN_SCRIPT=${PRERUN_SCRIPT:="$ASSETS_DIR/pre_running"}
+export VOLUMES_LIST=${VOLUMES_LIST:="$ASSETS_DIR/volumes.list"}
+export VOLUMES_ARCHIVE=${VOLUMES_ARCHIVE:="$ASSETS_DIR/volumes.tar"}
+export INITIALIZED_FLAG=${INITIALIZED_FLAG:="$ASSERS_DIR/initialized.flag"}
 
 ENTRY_PROMPT=${ENTRY_PROMPT:="entrypoint> "}
 
@@ -22,7 +22,7 @@ case ${1} in
         # run user defined script
         if [[ -f $BUILD_SCRIPT ]]; then
             echo "$ENTRY_PROMPT running build.sh"
-            source $BUILD_SCRIPT
+            $BUILD_SCRIPT
         fi
 
         set +e
@@ -120,7 +120,7 @@ case ${1} in
         # pre-running script
         if [[ -f $PRE_RUN_SCRIPT ]]; then
             echo "$ENTRY_PROMPT pre-running script"
-            source $PRE_RUN_SCRIPT
+            $PRE_RUN_SCRIPT
         fi
 
         # unset all environment varibles
