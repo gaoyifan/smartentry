@@ -2,7 +2,7 @@
 
 [[ $DEBUG == true ]] && set -x
 
-PWD_ORGI=$PWD
+pwd_orig=$PWD
 
 export ASSETS_DIR=${ASSETS_DIR:-"/etc/docker-assets"}
 export ROOTFS_DIR=${ROOTFS_DIR:-"$ASSETS_DIR/rootfs"}
@@ -15,21 +15,30 @@ export VOLUMES_LIST=${VOLUMES_LIST:="$ASSETS_DIR/volumes.list"}
 export VOLUMES_ARCHIVE=${VOLUMES_ARCHIVE:="$ASSETS_DIR/volumes.tar"}
 export INITIALIZED_FLAG=${INITIALIZED_FLAG:="$ASSERS_DIR/initialized.flag"}
 
-ENTRY_PROMPT=${ENTRY_PROMPT:="entrypoint> "}
+export ENABLE_KEEP_USER_MODIFICATION=${ENABLE_KEEP_USER_MODIFICATION:="true"}
+export ENABLE_CHMOD_AUTO_FIX=${ENABLE_CHMOD_AUTO_FIX:="true"}
+export ENABLE_INIT_VOLUMES_DATA=${ENABLE_INIT_VOLUMES_DATA:="true"}
+export ENABLE_ROOTFS=${ENABLE_ROOTFS:="true"}
+export ENABLE_CHMOD_FIX=${ENABLE_CHMOD_FIX:="true"}
+export ENABLE_UNSET_ENV_VARIBLES=${ENABLE_UNSET_ENV_VARIBLES:="true"}
+export ENABLE_PRE_RUN_SCRIPT=${ENABLE_PRE_RUN_SCRIPT:="true"}
+export ENABLE_FORCE_INIT_VOLUMES_DATA=${ENABLE_FORCE_INIT_VOLUMES_DATA:="false"}
+
+entry_prompt=${entry_prompt:="entrypoint> "}
 
 case ${1} in
     build)
         # run user defined script
         if [[ -f $BUILD_SCRIPT ]]; then
-            echo "$ENTRY_PROMPT running build.sh"
+            echo "$entry_prompt running build script"
             $BUILD_SCRIPT
         fi
 
         set +e
 
         # generate MD5 list for target files of rootfs, to keep user's modification when docker restart 
-        if [[ -d $ROOTFS_DIR ]] && [[ $KEEP_USER_MODIFICATION_ENABLE != false ]] ; then
-            echo "$ENTRY_PROMPT generate MD5 list"
+        if [[ -d $ROOTFS_DIR ]] && [[ $ENABLE_KEEP_USER_MODIFICATION == true ]] ; then
+            echo "$entry_prompt generate MD5 list"
             cd $ROOTFS_DIR
             TEMPLATE_VARIABLES=$(find . -type f -exec grep -P -o '(?<={{).+?(?=}})' {} \; | xargs -n 1 echo | sort | uniq ) 
             find . -type f | 
@@ -40,8 +49,8 @@ case ${1} in
         fi
 
         # chmod for rootfs
-        if [[ -d $ROOTFS_DIR ]] && [[ $CHMOD_AUTO_FIX_ENABLE != false ]]; then
-            echo "$ENTRY_PROMPT chmod for rootfs"
+        if [[ -d $ROOTFS_DIR ]] && [[ $ENABLE_CHMOD_AUTO_FIX == true ]]; then
+            echo "$entry_prompt chmod for rootfs"
             cd $ROOTFS_DIR 
             find . -type f -o -type d |
             while read file; do
@@ -54,8 +63,8 @@ case ${1} in
 
         # init volume data
         if [[ -f $VOLUMES_LIST ]]; then
-            echo "$ENTRY_PROMPT save volume data"
-            cat $VOLUMES_LIST | xargs tar -rf $VOLUMES_ARCHIVE
+            echo "$entry_prompt save volume data"
+            cat $VOLUMES_LIST | xargs tar -rPf $VOLUMES_ARCHIVE
         fi
 
         ;;
@@ -63,7 +72,7 @@ case ${1} in
     *)
         # set default environment variable
         if [[ -f $DEFAULT_ENV_FILE ]] ; then
-            echo "$ENTRY_PROMPT apply default environment variable"
+            echo "$entry_prompt apply default environment variable"
             source $DEFAULT_ENV_FILE
         fi
 
@@ -76,16 +85,27 @@ case ${1} in
         fi
 
         # init volume data
-        if [[ -f $VOLUMES_ARCHIVE ]] && [[ $INIT_VOLUMES_DATA_ENABLE == true ]] && [[ $HAVE_INITIALIZED == false ]]; then
-            echo "$ENTRY_PROMPT init volume data"
-            tar -C / -xf $VOLUMES_ARCHIVE
+        if [[ -f $VOLUMES_ARCHIVE ]] && [[ $ENABLE_INIT_VOLUMES_DATA == true ]] && [[ $HAVE_INITIALIZED == false ]]; then
+            echo "$entry_prompt init volume data"
+            cat $VOLUMES_LIST |
+            while read volume; do
+                # empty directory or directory not exist
+                if [ ! "`ls -A $volume 2> /dev/null`" ] && [ ! -f $volume ] || [ $ENABLE_FORCE_INIT_VOLUMES_DATA == true ]; then
+                    tar -C / -xPf $VOLUMES_ARCHIVE $volum
+                fi
+            done
         fi
 
         # patch file; apply template
-        if [[ -d $ROOTFS_DIR ]] && [[ $ROOTFS_ENABLE != false ]]; then
-            echo "$ENTRY_PROMPT patch template files"
+        if [[ -d $ROOTFS_DIR ]] && [[ $ENABLE_ROOTFS == true ]]; then
+            echo "$entry_prompt patch template files"
             cd $ROOTFS_DIR
-            find . -mindepth 1 -type d | while read dir; do mkdir -p ${dir#*.} ; done
+
+            find . -mindepth 1 -type d | 
+            while read dir; do 
+                mkdir -p ${dir#*.} ; 
+            done
+
             TEMPLATE_VARIABLES=$(find . -type f -exec grep -P -o '(?<={{).+?(?=}})' {} \; | xargs -n 1 echo | sort | uniq)
             find . -type f | 
             while read file; do
@@ -111,38 +131,39 @@ case ${1} in
         fi
 
         # fix file mode
-        if [[ -f $CHMOD_FILE ]] && [[ $CHMOD_FIX_ENABLE != false ]]; then
-            echo "$ENTRY_PROMPT fix file mode"
+        if [[ -f $CHMOD_FILE ]] && [[ $ENABLE_CHMOD_FIX == true ]]; then
+            echo "$entry_prompt fix file mode"
             cat $CHMOD_FILE | awk '{ printf("chmod %s %s\n",$1,$4); }' | sh
             cat $CHMOD_FILE | awk '{ printf("chown %s:%s %s\n",$2,$3,$4); }' | sh
         fi
 
         # pre-running script
-        if [[ -f $PRE_RUN_SCRIPT ]]; then
-            echo "$ENTRY_PROMPT pre-running script"
+        if [[ -f $PRE_RUN_SCRIPT ]] && [[ $ENABLE_PRE_RUN_SCRIPT == true ]]; then
+            echo "$entry_prompt pre_running script"
             $PRE_RUN_SCRIPT
         fi
 
         # unset all environment varibles
-        if [[ $UNSET_ENVIRONMENT_VARIBLES != false ]]; then
-            TERM_ORIG=$TERM
-            PATH_ORIG=$PATH
-            HOME_ORIG=$HOME
-            SHLVL_ORIG=$SHLVL
+        if [[ $ENABLE_UNSET_ENV_VARIBLES == true ]]; then
+            term_orig=$TERM
+            path_orig=$PATH
+            home_orig=$HOME
+            shlvl_orig=$SHLVL
 
             for i in $(env | awk -F"=" '{print $1}') ; do
                 unset $i; 
             done
-            
-            export TERM=$TERM_ORIG
-            export PATH=$PATH_ORIG
-            export HOME=$PATH_ORIG
-            export SHLVL=$SHLVL_ORIG
+
+            export TERM=$term_orig
+            export PATH=$path_orig
+            export HOME=$home_orig
+            export SHLVL=$shlvl_orig
         fi
 
-        # main program
-        echo "$ENTRY_PROMPT running main program"
-        cd $PWD_ORGI
+        # run main program
+        echo "$entry_prompt running main program"
+        cd $pwd_orig
         exec "$@"
+
         ;;
 esac
