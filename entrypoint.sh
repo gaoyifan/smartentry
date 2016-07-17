@@ -91,7 +91,7 @@ case ${1} in
             while read volume; do
                 # empty directory or directory not exist
                 if [ ! "`ls -A $volume 2> /dev/null`" ] && [ ! -f $volume ] || [ $ENABLE_FORCE_INIT_VOLUMES_DATA == true ]; then
-                    tar -C / -xPf $VOLUMES_ARCHIVE $volum
+                    tar -C / -xPf $VOLUMES_ARCHIVE $volume
                 fi
             done
         fi
