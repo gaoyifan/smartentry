@@ -7,10 +7,10 @@ pwd_orig=$PWD
 export ASSETS_DIR=${ASSETS_DIR:-"/etc/docker-assets"}
 export ROOTFS_DIR=${ROOTFS_DIR:-"$ASSETS_DIR/rootfs"}
 export CHECKLIST_FILE=${CHECKLIST_FILE:-"$ASSETS_DIR/checklist.md5"}
-export DEFAULT_ENV_FILE=${DEFAULT_ENV_FILE:-"$ASSETS_DIR/default_env.sh"}
+export DEFAULT_ENV_FILE=${DEFAULT_ENV_FILE:-"$ASSETS_DIR/default-env.sh"}
 export CHMOD_FILE=${CHMOD_FILE:-"$ASSETS_DIR/chmod.list"}
 export BUILD_SCRIPT=${BUILD_SCRIPT:-"$ASSETS_DIR/build"}
-export PRE_RUN_SCRIPT=${PRERUN_SCRIPT:="$ASSETS_DIR/pre_running"}
+export PRE_RUN_SCRIPT=${PRERUN_SCRIPT:="$ASSETS_DIR/pre-run"}
 export VOLUMES_LIST=${VOLUMES_LIST:="$ASSETS_DIR/volumes.list"}
 export VOLUMES_ARCHIVE=${VOLUMES_ARCHIVE:="$ASSETS_DIR/volumes.tar"}
 export INITIALIZED_FLAG=${INITIALIZED_FLAG:="$ASSERS_DIR/initialized.flag"}
