@@ -24,7 +24,7 @@ export ENABLE_UNSET_ENV_VARIBLES=${ENABLE_UNSET_ENV_VARIBLES:="true"}
 export ENABLE_PRE_RUN_SCRIPT=${ENABLE_PRE_RUN_SCRIPT:="true"}
 export ENABLE_FORCE_INIT_VOLUMES_DATA=${ENABLE_FORCE_INIT_VOLUMES_DATA:="false"}
 
-entry_prompt=${entry_prompt:="entrypoint> "}
+entry_prompt=${entry_prompt:="smartentry> "}
 
 case ${1} in
     build)
