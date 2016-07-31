@@ -40,7 +40,7 @@ case ${1} in
         if [[ -d $ROOTFS_DIR ]] && [[ $ENABLE_KEEP_USER_MODIFICATION == true ]] ; then
             echo "$entry_prompt generate MD5 list"
             cd $ROOTFS_DIR
-            TEMPLATE_VARIABLES=$(find . -type f -exec grep -P -o '(?<={{).+?(?=}})' {} \; | xargs -n 1 echo | sort | uniq ) 
+            TEMPLATE_VARIABLES=$(find . -type f -exec awk -vRS='}}' '/\{\{/{gsub(/.*\{\{/,"");print}' {} \; | xargs -n 1 echo | sort | uniq ) 
             find . -type f | 
             while read file; do
                 file_dst=${file#*.} ;
@@ -106,7 +106,7 @@ case ${1} in
                 mkdir -p ${dir#*.} ; 
             done
 
-            TEMPLATE_VARIABLES=$(find . -type f -exec grep -P -o '(?<={{).+?(?=}})' {} \; | xargs -n 1 echo | sort | uniq)
+            TEMPLATE_VARIABLES=$(find . -type f -exec awk -vRS='}}' '/\{\{/{gsub(/.*\{\{/,"");print}' {} \; | xargs -n 1 echo | sort | uniq)
             find . -type f | 
             while read file; do
                 file_dst=${file#*.}
