@@ -143,6 +143,10 @@ case ${1} in
             $PRE_RUN_SCRIPT
         fi
 
+        docker_uid=$DOCKER_UID
+        docker_gid=$DOCKER_GID
+        docker_user=$DOCKER_USER
+
         # unset all environment varibles
         if [[ $ENABLE_UNSET_ENV_VARIBLES == true ]]; then
             term_orig=$TERM
@@ -163,6 +167,26 @@ case ${1} in
         # run main program
         echo "$entry_prompt running main program"
         cd $pwd_orig
+
+        if [ ! -z $docker_uid ]; then
+            if [ -z $docker_gid ]; then
+                docker_gid=$docker_uid
+            fi
+            if [ -z $docker_user ]; then
+                docker_user=docker-inner-user
+            fi
+            echo "$docker_user:x:$docker_uid:$docker_gid::/var/empty:/bin/sh" >> /etc/passwd
+            echo "$entry_prompt running with UID=$docker_uid GID=$docker_gid USER=$docker_user"
+            su -m -c "$@" $docker_user
+            exit
+        fi
+
+        if [ ! -z $docker_user ]; then
+            echo "$entry_prompt running with USER=$docker_user"
+            su -c "$@" $docker_user
+            exit
+        fi
+
         exec "$@"
 
         ;;
