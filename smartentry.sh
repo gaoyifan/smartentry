@@ -4,7 +4,7 @@
 
 pwd_orig=$PWD
 
-export ASSETS_DIR=${ASSETS_DIR:-"/etc/docker-assets"}
+export ASSETS_DIR=${ASSETS_DIR:-"/opt/proj/docker"}
 export ROOTFS_DIR=${ROOTFS_DIR:-"$ASSETS_DIR/rootfs"}
 export CHECKLIST_FILE=${CHECKLIST_FILE:-"$ASSETS_DIR/checklist.md5"}
 export DEFAULT_ENV_FILE=${DEFAULT_ENV_FILE:-"$ASSETS_DIR/default-env.sh"}
