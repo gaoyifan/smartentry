@@ -76,6 +76,36 @@ case ${1} in
             source $DEFAULT_ENV_FILE
         fi
 
+        # set env: DOCKER_UID, DOCKER_GID, DOCKER_USER
+        if [[ $DOCKER_UID ]]; then
+            # UID exist in passwd
+            if [[ `getent passwd $DOCKER_UID` ]] ; then 
+                export DOCKER_USER=`getent passwd $DOCKER_UID | cut -d: -f1`
+                export DOCKER_GID=`getent passwd $DOCKER_UID | cut -d: -f4`
+                export DOCKER_HOME=`getent passwd $DOCKER_UID | cut -d: -f6`
+            else
+                export DOCKER_USER=${DOCKER_USER:-"docker-inner-user"}
+                export DOCKER_GID=${DOCKER_GID:-"$DOCKER_UID"}
+                export DOCKER_HOME=${DOCKER_HOME:-"/var/empty"}
+                echo "$DOCKER_USER:x:$DOCKER_UID:$DOCKER_GID::$DOCKER_HOME:/bin/sh" >> /etc/passwd
+            fi
+        elif [[ $DOCKER_USER ]]; then
+            # assert: user exist in passwd
+            if [[ ! `getent passwd $DOCKER_USER` ]]; then
+                >&2 echo "$entry_prompt ERROR: user=$DOCKER_USER not found in passwd. exit." ; 
+                exit
+            fi
+            export DOCKER_UID=`id -u $DOCKER_USER`
+            export DOCKER_GID=`id -g $DOCKER_USER`
+            passwd_home=`getent passwd $DOCKER_UID | cut -d: -f6`
+            [[ $passwd_home ]] && export DOCKER_HOME=$passwd_home
+        else
+            export DOCKER_USER=root
+            export DOCKER_UID=0
+            export DOCKER_GID=0
+            export DOCKER_HOME=${DOCKER_HOME:-"/var/empty"}
+        fi
+
         # set env: HAVE_INITIALIZED
         if [[ -f $INITIALIZED_FLAG ]]; then
             export HAVE_INITIALIZED=true
@@ -168,22 +198,9 @@ case ${1} in
         echo "$entry_prompt running main program"
         cd $pwd_orig
 
-        if [ ! -z $docker_uid ]; then
-            if [ -z $docker_gid ]; then
-                docker_gid=$docker_uid
-            fi
-            if [ -z $docker_user ]; then
-                docker_user=docker-inner-user
-            fi
-            echo "$docker_user:x:$docker_uid:$docker_gid::/var/empty:/bin/sh" >> /etc/passwd
+        if [[ $docker_uid != 0 ]]; then
             echo "$entry_prompt running with UID=$docker_uid GID=$docker_gid USER=$docker_user"
             su -m -c "$@" $docker_user
-            exit
-        fi
-
-        if [ ! -z $docker_user ]; then
-            echo "$entry_prompt running with USER=$docker_user"
-            su -c "$@" $docker_user
             exit
         fi
 
