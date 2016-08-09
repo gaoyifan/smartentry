@@ -7,7 +7,7 @@ pwd_orig=$PWD
 export ASSETS_DIR=${ASSETS_DIR:-"/opt/proj/docker"}
 export ROOTFS_DIR=${ROOTFS_DIR:-"$ASSETS_DIR/rootfs"}
 export CHECKLIST_FILE=${CHECKLIST_FILE:-"$ASSETS_DIR/checklist.md5"}
-export DEFAULT_ENV_FILE=${DEFAULT_ENV_FILE:-"$ASSETS_DIR/default-env.sh"}
+export PRE_ENTRY_SCRIPT=${PRE_ENTRY_SCRIPT:-"$ASSETS_DIR/pre-entry.sh"}
 export CHMOD_FILE=${CHMOD_FILE:-"$ASSETS_DIR/chmod.list"}
 export BUILD_SCRIPT=${BUILD_SCRIPT:-"$ASSETS_DIR/build"}
 export PRE_RUN_SCRIPT=${PRERUN_SCRIPT:="$ASSETS_DIR/pre-run"}
@@ -70,10 +70,10 @@ case ${1} in
         ;;
 
     *)
-        # set default environment variable
-        if [[ -f $DEFAULT_ENV_FILE ]] ; then
-            echo "$entry_prompt apply default environment variable"
-            source $DEFAULT_ENV_FILE
+        # pre-entry script
+        if [[ -f $PRE_ENTRY_SCRIPT ]] ; then
+            echo "$entry_prompt running pre-entry script"
+            source $PRE_ENTRY_SCRIPT
         fi
 
         # set env: DOCKER_UID, DOCKER_GID, DOCKER_USER
