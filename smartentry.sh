@@ -37,11 +37,10 @@ case ${1} in
         set +e
 
         # generate MD5 list for target files of rootfs, to keep user's modification when docker restart 
-        if [[ -d $ROOTFS_DIR ]] && [[ $ENABLE_KEEP_USER_MODIFICATION == true ]] ; then
+        if [[ $ENABLE_ROOTFS == true ]] && [[ -d $ROOTFS_DIR ]] && [[ $ENABLE_KEEP_USER_MODIFICATION == true ]] ; then
             echo "$entry_prompt generate MD5 list"
             cd $ROOTFS_DIR
-            TEMPLATE_VARIABLES=$(find . -type f -exec awk -vRS='}}' '/\{\{/{gsub(/.*\{\{/,"");print}' {} \; | xargs -n 1 echo | sort | uniq ) 
-            find . -type f | 
+            find . -type f |
             while read file; do
                 file_dst=${file#*.} ;
                 [[ -f $file_dst ]] && md5sum $file_dst >> $CHECKLIST_FILE
@@ -140,8 +139,8 @@ case ${1} in
             find . -type f | 
             while read file; do
                 file_dst=${file#*.}
-                if [[ -f $CHECKLIST_FILE ]]; then
-                    cat $CHECKLIST_FILE | grep $file_dst | md5sum -c --quiet > /dev/null 2>&1 && cp $file $file_dst ;
+                if [[ $ENABLE_KEEP_USER_MODIFICATION ]]; then
+                    [[ -f $CHECKLIST_FILE ]] && cat $CHECKLIST_FILE | grep $file_dst | md5sum -c --quiet > /dev/null 2>&1 && cp $file $file_dst ;
                     [[ ! -f $file_dst ]] && cp $file $file_dst ;
                 else
                     cp $file $file_dst ;
