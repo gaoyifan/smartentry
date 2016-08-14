@@ -23,6 +23,8 @@ export ENABLE_CHMOD_FIX=${ENABLE_CHMOD_FIX:="true"}
 export ENABLE_UNSET_ENV_VARIBLES=${ENABLE_UNSET_ENV_VARIBLES:="true"}
 export ENABLE_PRE_RUN_SCRIPT=${ENABLE_PRE_RUN_SCRIPT:="true"}
 export ENABLE_FORCE_INIT_VOLUMES_DATA=${ENABLE_FORCE_INIT_VOLUMES_DATA:="false"}
+export ENABLE_FIX_OWNER_OF_VOLUMES=${ENABLE_FIX_OWNER_OF_VOLUMES:="false"}
+export ENABLE_FIX_OWNER_OF_VOLUMES_DATA=${ENABLE_FIX_OWNER_OF_VOLUMES_DATA:="false"}
 
 entry_prompt=${entry_prompt:="smartentry> "}
 
@@ -60,10 +62,16 @@ case ${1} in
             mv ${CHMOD_FILE}.add ${CHMOD_FILE}
         fi
 
-        # init volume data
+        # save volume data
         if [[ -f $VOLUMES_LIST ]]; then
             echo "$entry_prompt save volume data"
-            cat $VOLUMES_LIST | xargs tar -rPf $VOLUMES_ARCHIVE
+            cat $VOLUMES_LIST | while read volume; do
+                if [[ ! -e $volume ]]; then
+                    >&2 echo "$entry_prompt WARNING: volume $volume doesn't exist, created an empty dir."
+                    mkdir -p $volume
+                fi
+                tar -rPf $VOLUMES_ARCHIVE $volume
+            done
         fi
 
         ;;
@@ -121,6 +129,10 @@ case ${1} in
                 # empty directory or directory not exist
                 if [ ! "`ls -A $volume 2> /dev/null`" ] && [ ! -f $volume ] || [ $ENABLE_FORCE_INIT_VOLUMES_DATA == true ]; then
                     tar -C / -xPf $VOLUMES_ARCHIVE $volume
+                    if [[ $DOCKER_UID != 0 ]]; then
+                        [[ $ENABLE_FIX_OWNER_OF_VOLUMES == true ]] && chown $DOCKER_UID:$DOCKER_GID $volume
+                        [[ $ENABLE_FIX_OWNER_OF_VOLUMES_DATA == true ]] && chown -R $DOCKER_UID:$DOCKER_GID $volume
+                    fi
                 fi
             done
         fi
@@ -199,11 +211,12 @@ case ${1} in
 
         if [[ $docker_uid != 0 ]]; then
             echo "$entry_prompt running with UID=$docker_uid GID=$docker_gid USER=$docker_user"
-            su -m -c "$@" $docker_user
+            cmd_str=`echo $@`
+            exec su -m -c "$cmd_str" $docker_user
             exit
         fi
 
-        exec "$@"
+        "$@"
 
         ;;
 esac
