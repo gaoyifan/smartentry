@@ -77,6 +77,14 @@ case ${1} in
         ;;
 
     *)
+        # set env: HAVE_INITIALIZED
+        if [[ -f $INITIALIZED_FLAG ]]; then
+            export HAVE_INITIALIZED=true
+        else
+            export HAVE_INITIALIZED=false
+            touch $INITIALIZED_FLAG
+        fi
+
         # pre-entry script
         if [[ -f $PRE_ENTRY_SCRIPT ]] ; then
             echo "$entry_prompt running pre-entry script"
@@ -111,14 +119,6 @@ case ${1} in
             export DOCKER_UID=0
             export DOCKER_GID=0
             export DOCKER_HOME=${DOCKER_HOME:-"/var/empty"}
-        fi
-
-        # set env: HAVE_INITIALIZED
-        if [[ -f $INITIALIZED_FLAG ]]; then
-            export HAVE_INITIALIZED=true
-        else
-            export HAVE_INITIALIZED=false
-            touch $INITIALIZED_FLAG
         fi
 
         # init volume data
