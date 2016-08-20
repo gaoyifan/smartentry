@@ -33,7 +33,7 @@ case ${1} in
         # run user defined script
         if [[ -f $BUILD_SCRIPT ]]; then
             echo "$entry_prompt running build script"
-            $BUILD_SCRIPT
+            $BUILD_SCRIPT || exit 1
         fi
 
         set +e
