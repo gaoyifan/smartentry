@@ -4,7 +4,7 @@
 
 pwd_orig=$PWD
 
-export ASSETS_DIR=${ASSETS_DIR:-"/opt/proj/docker"}
+export ASSETS_DIR=${ASSETS_DIR:-"/opt/smartentry/HEAD"}
 export ROOTFS_DIR=${ROOTFS_DIR:-"$ASSETS_DIR/rootfs"}
 export CHECKLIST_FILE=${CHECKLIST_FILE:-"$ASSETS_DIR/checklist.md5"}
 export PRE_ENTRY_SCRIPT=${PRE_ENTRY_SCRIPT:-"$ASSETS_DIR/pre-entry.sh"}
