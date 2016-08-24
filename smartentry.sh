@@ -152,7 +152,7 @@ case ${1} in
             while read file; do
                 file_dst=${file#*.}
                 if [[ $ENABLE_KEEP_USER_MODIFICATION ]]; then
-                    [[ -f $CHECKLIST_FILE ]] && cat $CHECKLIST_FILE | grep $file_dst | md5sum -c --quiet > /dev/null 2>&1 && cp $file $file_dst ;
+                    [[ -f $CHECKLIST_FILE ]] && cat $CHECKLIST_FILE | grep $file_dst | md5sum -c 2> /dev/null | grep 'OK$' > /dev/null && cp $file $file_dst ;
                     [[ ! -f $file_dst ]] && cp $file $file_dst ;
                 else
                     cp $file $file_dst ;
