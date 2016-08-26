@@ -89,7 +89,8 @@ case ${1} in
         # save volume data
         if [[ -f $VOLUMES_LIST ]]; then
             echo "$entry_prompt save volume data"
-            cat $VOLUMES_LIST | while read volume; do
+            cat $VOLUMES_LIST |
+            while read volume; do
                 if [[ ! -e $volume ]]; then
                     >&2 echo "$entry_prompt WARNING: volume $volume doesn't exist, created an empty dir."
                     mkdir -p $volume
@@ -100,8 +101,8 @@ case ${1} in
 
         ;;
 
-    # run a program
-    *)
+        # run a program
+        *)
         # set env: HAVE_INITIALIZED
         if [[ -f $INITIALIZED_FLAG ]]; then
             export HAVE_INITIALIZED=true
