@@ -3,11 +3,34 @@
 [[ $DEBUG == true ]] && set -x
 
 pwd_orig=$PWD
+entry_prompt=${entry_prompt:-"smartentry> "}
 
 export ASSETS_DIR=${ASSETS_DIR:-"/opt/smartentry/HEAD"}
+export ENV_FILE=${ENV_FILE:-"$ASSETS_DIR/env"}
+export ENABLE_OVERRIDE_ENV=${ENABLE_OVERRIDE_ENV:-"false"}
+
+declare -a required_envs
+if [[ -f $ENV_FILE ]]; then
+    echo "$entry_prompt setting environment virables"
+    while read env; do
+        env_name=$(eval echo ${env%%=*})
+        env_value=$(eval echo ${env#*=})
+        if [[ -n $env_name ]]; then
+            if ! ( echo $env | grep = > /dev/null ) ; then
+                required_envs+=($env_name)
+            else
+                if [[ $ENABLE_OVERRIDE_ENV == true ]]; then
+                    export $env_name=$env_value
+                else
+                    eval export $(echo "$env_name=\${$env_name:-\"\$env_value\"}")
+                fi
+            fi
+        fi
+    done < $ENV_FILE
+fi
+
 export ROOTFS_DIR=${ROOTFS_DIR:-"$ASSETS_DIR/rootfs"}
 export CHECKLIST_FILE=${CHECKLIST_FILE:-"$ASSETS_DIR/checklist.md5"}
-export ENV_FILE=${ENV_FILE:-"$ASSETS_DIR/env"}
 export PRE_ENTRY_SCRIPT=${PRE_ENTRY_SCRIPT:-"$ASSETS_DIR/pre-entry.sh"}
 export CHMOD_FILE=${CHMOD_FILE:-"$ASSETS_DIR/chmod.list"}
 export BUILD_SCRIPT=${BUILD_SCRIPT:-"$ASSETS_DIR/build"}
@@ -27,28 +50,7 @@ export ENABLE_FORCE_INIT_VOLUMES_DATA=${ENABLE_FORCE_INIT_VOLUMES_DATA:-"false"}
 export ENABLE_FIX_OWNER_OF_VOLUMES=${ENABLE_FIX_OWNER_OF_VOLUMES:-"false"}
 export ENABLE_FIX_OWNER_OF_VOLUMES_DATA=${ENABLE_FIX_OWNER_OF_VOLUMES_DATA:-"false"}
 export ENABLE_MANDATORY_CHECK_ENV=${ENABLE_MANDATORY_CHECK_ENV:-"true"}
-export ENABLE_OVERRIDE_ENV=${ENABLE_OVERRIDE_ENV:-"false"}
 
-entry_prompt=${entry_prompt:-"smartentry> "}
-
-declare -a required_envs
-if [[ -f $ENV_FILE ]]; then
-    while read env; do
-        env_name=$(eval echo ${env%%=*})
-        env_value=$(eval echo ${env#*=})
-        if [[ -n $env_name ]]; then
-            if ! ( echo $env | grep = > /dev/null ) ; then
-                required_envs+=($env_name)
-            else
-                if [[ $ENABLE_OVERRIDE_ENV == true ]]; then
-                    export $env_name=$env_value
-                else
-                    eval export $(echo "$env_name=\${$env_name:-\"\$env_value\"}")
-                fi
-            fi
-        fi
-    done < $ENV_FILE
-fi
 
 case ${1} in
     build)
