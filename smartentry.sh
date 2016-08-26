@@ -218,7 +218,7 @@ case ${1} in
 
         # pre-running script
         if [[ -f $PRE_RUN_SCRIPT ]] && [[ $ENABLE_PRE_RUN_SCRIPT == true ]]; then
-            echo "$entry_prompt pre_running script"
+            echo "$entry_prompt pre-run script"
             $PRE_RUN_SCRIPT
         fi
 
