@@ -27,6 +27,7 @@ export ENABLE_FORCE_INIT_VOLUMES_DATA=${ENABLE_FORCE_INIT_VOLUMES_DATA:-"false"}
 export ENABLE_FIX_OWNER_OF_VOLUMES=${ENABLE_FIX_OWNER_OF_VOLUMES:-"false"}
 export ENABLE_FIX_OWNER_OF_VOLUMES_DATA=${ENABLE_FIX_OWNER_OF_VOLUMES_DATA:-"false"}
 export ENABLE_MANDATORY_CHECK_ENV=${ENABLE_MANDATORY_CHECK_ENV:-"true"}
+export ENABLE_OVERRIDE_ENV=${ENABLE_OVERRIDE_ENV:-"false"}
 
 entry_prompt=${entry_prompt:-"smartentry> "}
 
@@ -39,7 +40,11 @@ if [[ -f $ENV_FILE ]]; then
             if ! ( echo $env | grep = > /dev/null ) ; then
                 required_envs+=($env_name)
             else
-                export $env_name=$env_value
+                if [[ $ENABLE_OVERRIDE_ENV == true ]]; then
+                    export $env_name=$env_value
+                else
+                    eval export $(echo "$env_name=\${$env_name:-\"\$env_value\"}")
+                fi
             fi
         fi
     done < $ENV_FILE
