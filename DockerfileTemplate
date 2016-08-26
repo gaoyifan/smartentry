@@ -1,15 +1,7 @@
-FROM centos:7
+FROM smartentry/alpine:3.4
 
-MAINTAINER Yifan Gao "git@gaoyifan.com"
+COPY assets_dir $ASSETS_DIR
 
-ENV ASSETS_DIR="/etc/docker-assets/
-
-COPY assets $ASSETS_DIR
-
-COPY entrypoint/entrypoint.sh /sbin/entrypoint.sh
-
-RUN /sbin/entrypoint.sh build
-
-ENTRYPOINT ["/sbin/entrypoint.sh"]
+RUN smartentry.sh build
 
 CMD ["/bin/bash", "-c", "echo Hello World!"]
