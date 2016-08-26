@@ -26,6 +26,7 @@ export ENABLE_PRE_RUN_SCRIPT=${ENABLE_PRE_RUN_SCRIPT:-"true"}
 export ENABLE_FORCE_INIT_VOLUMES_DATA=${ENABLE_FORCE_INIT_VOLUMES_DATA:-"false"}
 export ENABLE_FIX_OWNER_OF_VOLUMES=${ENABLE_FIX_OWNER_OF_VOLUMES:-"false"}
 export ENABLE_FIX_OWNER_OF_VOLUMES_DATA=${ENABLE_FIX_OWNER_OF_VOLUMES_DATA:-"false"}
+export ENABLE_MANDATORY_CHECK_ENV=${ENABLE_MANDATORY_CHECK_ENV:-"true"}
 
 entry_prompt=${entry_prompt:-"smartentry> "}
 
@@ -108,8 +109,8 @@ case ${1} in
             source $PRE_ENTRY_SCRIPT
         fi
 
-        # check required env
-        if [[ ${#required_envs[@]} != 0 ]]; then
+        # mandatory check required env
+        if [[ $ENABLE_MANDATORY_CHECK_ENV == true ]] && [[ ${#required_envs[@]} != 0 ]]; then
             echo "$entry_prompt checking required environment variables"
             for required_env in ${required_envs[@]}; do
                 if [[ -z $(eval `echo "\${${reqiured_env}+x}"`) ]]; then
