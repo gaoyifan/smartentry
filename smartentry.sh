@@ -83,7 +83,7 @@ case ${1} in
                 [[ -e $file_dst ]] && stat -c "%a	%U	%G	$(realpath $file_dst)" $file_dst >> ${CHMOD_FILE}.add
             done
             [[ -f ${CHMOD_FILE} ]] && cat ${CHMOD_FILE} >> ${CHMOD_FILE}.add
-            mv ${CHMOD_FILE}.add ${CHMOD_FILE}
+            [[ -f ${CHMOD_FILE}.add ]] && mv ${CHMOD_FILE}.add ${CHMOD_FILE}
         fi
 
         # save volume data
