@@ -33,6 +33,7 @@ export ROOTFS_DIR=${ROOTFS_DIR:-"$ASSETS_DIR/rootfs"}
 export CHECKLIST_FILE=${CHECKLIST_FILE:-"$ASSETS_DIR/checklist.md5"}
 export PRE_ENTRY_SCRIPT=${PRE_ENTRY_SCRIPT:-"$ASSETS_DIR/pre-entry.sh"}
 export CHMOD_FILE=${CHMOD_FILE:-"$ASSETS_DIR/chmod.list"}
+export RUN_SCRIPT=${RUN_SCRIPT:-"$ASSETS_DIR/run"}
 export BUILD_SCRIPT=${BUILD_SCRIPT:-"$ASSETS_DIR/build"}
 export PRE_RUN_SCRIPT=${PRERUN_SCRIPT:-"$ASSETS_DIR/pre-run"}
 export VOLUMES_LIST=${VOLUMES_LIST:-"$ASSETS_DIR/volumes.list"}
@@ -234,6 +235,7 @@ case ${1} in
         docker_gid=$DOCKER_GID
         docker_user=$DOCKER_USER
         docker_shell=$DOCKER_SHELL
+        run_script=$RUN_SCRIPT
 
         # unset all environment varibles
         if [[ $ENABLE_UNSET_ENV_VARIBLES == true ]]; then
@@ -255,7 +257,16 @@ case ${1} in
         # run main program
         echo "$entry_prompt running main program(UID=$docker_uid GID=$docker_gid USER=$docker_user)"
         cd $pwd_orig
-        exec su -m -s $docker_shell -c "`echo $@`" $docker_user
+        if [[ $1 == run ]]; then
+            if [[ -f $run_script ]]; then
+                cmd="exec $run_script"
+            else
+                >&2 echo "$entry_prompt WARNING: no CMD set. exit."
+            fi
+        else
+            cmd=`echo $@`
+        fi
+        exec su -m -s $docker_shell -c "$cmd" $docker_user
 
         ;;
 esac
