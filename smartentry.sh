@@ -38,6 +38,10 @@ export PRE_RUN_SCRIPT=${PRERUN_SCRIPT:-"$ASSETS_DIR/pre-run"}
 export VOLUMES_LIST=${VOLUMES_LIST:-"$ASSETS_DIR/volumes.list"}
 export VOLUMES_ARCHIVE=${VOLUMES_ARCHIVE:-"$ASSETS_DIR/volumes.tar"}
 export INITIALIZED_FLAG=${INITIALIZED_FLAG:-"/var/run/smartentry.initialized"}
+export DOCKER_UID=${DOCKER_UID:-"0"}
+export DOCKER_GID=${DOCKER_GID:-"0"}
+export DOCKER_USER=${DOCKER_USER:-"root"}
+export DOCKER_HOME=${DOCKER_HOME:-"/var/empty"}
 
 export ENABLE_KEEP_USER_MODIFICATION=${ENABLE_KEEP_USER_MODIFICATION:-"true"}
 export ENABLE_CHMOD_AUTO_FIX=${ENABLE_CHMOD_AUTO_FIX:-"true"}
@@ -130,19 +134,18 @@ case ${1} in
 
 
         # set env: DOCKER_UID, DOCKER_GID, DOCKER_USER
-        if [[ $DOCKER_UID ]]; then
+        if [[ $DOCKER_UID != 0 ]]; then
             # UID exist in passwd
             if [[ `getent passwd $DOCKER_UID` ]] ; then 
                 export DOCKER_USER=`getent passwd $DOCKER_UID | cut -d: -f1`
                 export DOCKER_GID=`getent passwd $DOCKER_UID | cut -d: -f4`
                 export DOCKER_HOME=`getent passwd $DOCKER_UID | cut -d: -f6`
             else
-                export DOCKER_USER=${DOCKER_USER:-"docker-inner-user"}
+                [[ DOCKER_USER == root ]] && export DOCKER_USER=docker-inner-user
                 export DOCKER_GID=${DOCKER_GID:-"$DOCKER_UID"}
-                export DOCKER_HOME=${DOCKER_HOME:-"/var/empty"}
                 echo "$DOCKER_USER:x:$DOCKER_UID:$DOCKER_GID::$DOCKER_HOME:/bin/sh" >> /etc/passwd
             fi
-        elif [[ $DOCKER_USER ]]; then
+        elif [[ $DOCKER_USER != root ]]; then
             # assert: user exist in passwd
             if [[ ! `getent passwd $DOCKER_USER` ]]; then
                 >&2 echo "$entry_prompt ERROR: user=$DOCKER_USER not found in passwd. exit." ; 
