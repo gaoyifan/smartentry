@@ -261,7 +261,7 @@ case ${1} in
             if [[ -f $run_script ]]; then
                 cmd="exec $run_script"
             else
-                >&2 echo "$entry_prompt WARNING: no CMD set. exit."
+                >&2 echo "$entry_prompt ERROR: run script not exist. exit."
             fi
         else
             cmd=`echo $@`
