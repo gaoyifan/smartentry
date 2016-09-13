@@ -1,7 +1,0 @@
-FROM smartentry/alpine:3.4
-
-COPY assets_dir $ASSETS_DIR
-
-RUN smartentry.sh build
-
-CMD ["/bin/bash", "-c", "echo Hello World!"]
