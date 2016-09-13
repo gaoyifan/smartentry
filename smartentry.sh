@@ -38,6 +38,7 @@ export PRE_RUN_SCRIPT=${PRERUN_SCRIPT:-"$ASSETS_DIR/pre-run"}
 export VOLUMES_LIST=${VOLUMES_LIST:-"$ASSETS_DIR/volumes.list"}
 export VOLUMES_ARCHIVE=${VOLUMES_ARCHIVE:-"$ASSETS_DIR/volumes.tar"}
 export INITIALIZED_FLAG=${INITIALIZED_FLAG:-"/var/run/smartentry.initialized"}
+export DOCKER_SHELL=${DOCKER_SHELL:-"/bin/bash"}
 
 export ENABLE_KEEP_USER_MODIFICATION=${ENABLE_KEEP_USER_MODIFICATION:-"true"}
 export ENABLE_CHMOD_AUTO_FIX=${ENABLE_CHMOD_AUTO_FIX:-"true"}
@@ -232,6 +233,7 @@ case ${1} in
         docker_uid=$DOCKER_UID
         docker_gid=$DOCKER_GID
         docker_user=$DOCKER_USER
+        docker_shell=$DOCKER_SHELL
 
         # unset all environment varibles
         if [[ $ENABLE_UNSET_ENV_VARIBLES == true ]]; then
@@ -251,17 +253,9 @@ case ${1} in
         fi
 
         # run main program
-        echo "$entry_prompt running main program"
+        echo "$entry_prompt running main program(UID=$docker_uid GID=$docker_gid USER=$docker_user)"
         cd $pwd_orig
-
-        if [[ $docker_uid != 0 ]]; then
-            echo "$entry_prompt running with UID=$docker_uid GID=$docker_gid USER=$docker_user"
-            cmd_str=`echo $@`
-            exec su -m -c "$cmd_str" $docker_user
-            exit
-        fi
-
-        "$@"
+        exec su -m -s $docker_shell -c "`echo $@`" $docker_user
 
         ;;
 esac
