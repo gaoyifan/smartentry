@@ -155,8 +155,15 @@ case ${1} in
         else
             export DOCKER_USER=root
             export DOCKER_UID=0
-            export DOCKER_GID=0
+            if [[ $DOCKER_GID ]] && [[ $DOCKER_GID != 0 ]]; then
+                >&2 echo "$entry_prompt ERROR: only set DOCKER_GID=$DOCKER_GID, but DOCKER_USER or DOCKER_UID not found. exit."   
+            else
+                export DOCKER_GID=0
+            fi
             export DOCKER_HOME=${DOCKER_HOME:-"/var/empty"}
+        fi
+        if [[ $DOCKER_HOME ]]; then
+            sed -i "s|^\([^:]*:[^:]*:$DOCKER_UID:[^:]*:[^:]*\):[^:]*:\([^:]*\)$|\1:$DOCKER_HOME:\2|g" /etc/passwd
         fi
 
         # init volume data
