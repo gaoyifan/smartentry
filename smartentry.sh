@@ -123,7 +123,7 @@ case ${1} in
         if [[ $ENABLE_MANDATORY_CHECK_ENV == true ]] && [[ ${#required_envs[@]} != 0 ]]; then
             echo "$entry_prompt checking required environment variables"
             for required_env in ${required_envs[@]}; do
-                if [[ -z $(eval `echo "\${${reqiured_env}+x}"`) ]]; then
+                if [[ -z ${!reqiured_env} ]]; then
                     >&2 echo "$entry_prompt environment value $required_env doesn't exist. program exit."
                     exit 2
                 fi
