@@ -19,10 +19,8 @@ if [[ -f $ENV_FILE ]]; then
             if ! ( echo $env | grep = > /dev/null ) ; then
                 required_envs+=($env_name)
             else
-                if [[ $ENABLE_OVERRIDE_ENV == true ]]; then
+                if [[ $ENABLE_OVERRIDE_ENV == true ]] || [[ -z ${!env_name} ]]; then
                     export $env_name=$env_value
-                else
-                    eval export $(echo "$env_name=\${$env_name:-\"\$env_value\"}")
                 fi
             fi
         fi
@@ -206,7 +204,7 @@ case ${1} in
                 fi
                 [[ -n $TEMPLATE_VARIABLES ]] && echo $TEMPLATE_VARIABLES | xargs -n 1 echo | 
                 while read variable; do
-                    variable_literal=$(eval echo \${$variable} | sed 's:/:\\/:g')
+                    variable_literal=$(echo ${!variable} | sed 's:/:\\/:g')
                     sed -i "s/{{$variable}}/$variable_literal/g" $file_dst ;
                 done
             done
