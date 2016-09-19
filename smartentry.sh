@@ -160,7 +160,7 @@ case ${1} in
             else
                 export DOCKER_GID=0
             fi
-            export DOCKER_HOME=${DOCKER_HOME:-"/var/empty"}
+            export DOCKER_HOME=${DOCKER_HOME:-"`getent passwd root | cut -d: -f6`"}
         fi
         if [[ $DOCKER_HOME ]]; then
             sed -i "s|^\([^:]*:[^:]*:$DOCKER_UID:[^:]*:[^:]*\):[^:]*:\([^:]*\)$|\1:$DOCKER_HOME:\2|g" /etc/passwd
