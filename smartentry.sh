@@ -192,7 +192,7 @@ case ${1} in
                 mkdir -p ${dir#*.} ; 
             done
 
-            TEMPLATE_VARIABLES=$(find . -type f -exec awk -vRS='}}' '/\{\{/{gsub(/.*\{\{/,"");print}' {} \; | xargs -n 1 echo | sort | uniq)
+            TEMPLATE_VARIABLES=$(find . -type f -exec grep -o '{{.\+}}' {} \; | awk -vRS='}}' '{gsub(/.*\{\{/,"");print}' | xargs -n 1 echo | sort | uniq)
             find . -type f | 
             while read file; do
                 file_dst=${file#*.}
