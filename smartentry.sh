@@ -266,7 +266,7 @@ case ${1} in
         fi
 
         if [[ $docker_user == root ]]; then
-            exec $cmd
+            $cmd
         else
             exec su -m -s $docker_shell -c "$cmd" $docker_user
         fi
