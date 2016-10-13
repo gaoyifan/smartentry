@@ -264,7 +264,12 @@ case ${1} in
         else
             cmd=`echo $@`
         fi
-        exec su -m -s $docker_shell -c "$cmd" $docker_user
+
+        if [[ $docker_user == root ]]; then
+            exec $cmd
+        else
+            exec su -m -s $docker_shell -c "$cmd" $docker_user
+        fi
 
         ;;
 esac
