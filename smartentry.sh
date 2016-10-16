@@ -256,8 +256,9 @@ case ${1} in
         echo "$entry_prompt running main program(UID=$docker_uid GID=$docker_gid USER=$docker_user)"
         cd $pwd_orig
         if [[ $1 == run ]]; then
+            shift
             if [[ -f $run_script ]]; then
-                cmd="exec $run_script"
+                cmd="exec $run_script $@"
             else
                 >&2 echo "$entry_prompt ERROR: run script not exist. exit."
             fi
