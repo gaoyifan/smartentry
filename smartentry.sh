@@ -219,8 +219,8 @@ case ${1} in
         # fix file mode
         if [[ -f $CHMOD_FILE ]] && [[ $ENABLE_CHMOD_FIX == true ]]; then
             echo "$entry_prompt fix file mode"
-            cat $CHMOD_FILE | awk '{ printf("chmod %s %s\n",$1,$4); }' | sh
-            cat $CHMOD_FILE | awk '{ printf("chown %s:%s %s\n",$2,$3,$4); }' | sh
+            cat $CHMOD_FILE | awk '{ printf("[[ -e %s ]] && chmod %s %s\n",$4,$1,$4); }' | bash
+            cat $CHMOD_FILE | awk '{ printf("[[ -e %s ]] && chown %s:%s %s\n",$4,$2,$3,$4); }' | bash
         fi
 
         # pre-running script
