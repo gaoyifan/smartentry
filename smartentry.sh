@@ -162,7 +162,8 @@ case ${1} in
             fi
             export DOCKER_HOME=${DOCKER_HOME:-"`getent passwd root | cut -d: -f6`"}
         fi
-        if [[ $DOCKER_HOME ]]; then
+        DOCKER_HOME_ORIG=`getent passwd $DOCKER_USER | cut -d: -f6`
+        if [[ $DOCKER_HOME ]] && [[ $DOCKER_HOME != $DOCKER_HOME_ORIG ]]; then
             sed -i "s|^\([^:]*:[^:]*:$DOCKER_UID:[^:]*:[^:]*\):[^:]*:\([^:]*\)$|\1:$DOCKER_HOME:\2|g" /etc/passwd
         fi
 
