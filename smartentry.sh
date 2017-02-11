@@ -2,6 +2,10 @@
 
 [[ $DEBUG == true ]] && set -x
 
+info(){
+    >&2 echo $entry_prompt $@
+}
+
 pwd_orig=$PWD
 entry_prompt=${entry_prompt:-"smartentry> "}
 
@@ -11,7 +15,7 @@ export ENABLE_OVERRIDE_ENV=${ENABLE_OVERRIDE_ENV:-"false"}
 
 declare -a required_envs
 if [[ -f $ENV_FILE ]]; then
-    echo "$entry_prompt setting environment virables"
+    info "setting environment virables"
     while read env; do
         env_name=$(eval echo ${env%%=*})
         env_value=$(eval echo ${env#*=})
@@ -56,7 +60,7 @@ case ${1} in
     build)
         # run user defined script
         if [[ -f $BUILD_SCRIPT ]]; then
-            echo "$entry_prompt running build script"
+            info "running build script"
             $BUILD_SCRIPT || exit 1
         fi
 
@@ -64,7 +68,7 @@ case ${1} in
 
         # generate MD5 list for target files of rootfs, to keep user's modification when docker restart 
         if [[ $ENABLE_ROOTFS == true ]] && [[ -d $ROOTFS_DIR ]] && [[ $ENABLE_KEEP_USER_MODIFICATION == true ]] ; then
-            echo "$entry_prompt generate MD5 list"
+            info "generate MD5 list"
             cd $ROOTFS_DIR
             find . -type f |
             while read file; do
@@ -75,12 +79,12 @@ case ${1} in
 
         # chmod for rootfs
         if [[ -d $ROOTFS_DIR ]] && [[ $ENABLE_CHMOD_AUTO_FIX == true ]]; then
-            echo "$entry_prompt chmod for rootfs"
+            info "chmod for rootfs"
             cd $ROOTFS_DIR 
             find . -type f -o -type d |
             while read file; do
                 file_dst=${file#*.} ;
-                [[ -e $file_dst ]] && stat -c "%a	%U	%G	$(realpath $file_dst)" $file_dst >> ${CHMOD_FILE}.add
+                [[ -e $file_dst ]] && stat -c "%a    %U    %G    $(realpath $file_dst)" $file_dst >> ${CHMOD_FILE}.add
             done
             [[ -f ${CHMOD_FILE} ]] && cat ${CHMOD_FILE} >> ${CHMOD_FILE}.add
             [[ -f ${CHMOD_FILE}.add ]] && mv ${CHMOD_FILE}.add ${CHMOD_FILE}
@@ -88,11 +92,11 @@ case ${1} in
 
         # save volume data
         if [[ -f $VOLUMES_LIST ]]; then
-            echo "$entry_prompt save volume data"
+            info "save volume data"
             cat $VOLUMES_LIST |
             while read volume; do
                 if [[ ! -e $volume ]]; then
-                    >&2 echo "$entry_prompt WARNING: volume $volume doesn't exist, created an empty dir."
+                    info "WARNING: volume $volume doesn\'t exist, created an empty dir."
                     mkdir -p $volume
                 fi
                 tar -rPf $VOLUMES_ARCHIVE $volume
@@ -113,16 +117,16 @@ case ${1} in
 
         # pre-entry script
         if [[ -f $PRE_ENTRY_SCRIPT ]] ; then
-            echo "$entry_prompt running pre-entry script"
+            info "running pre-entry script"
             source $PRE_ENTRY_SCRIPT
         fi
 
         # mandatory check required env
         if [[ $ENABLE_MANDATORY_CHECK_ENV == true ]] && [[ ${#required_envs[@]} != 0 ]]; then
-            echo "$entry_prompt checking required environment variables"
+            info "checking required environment variables"
             for required_env in ${required_envs[@]}; do
                 if [[ -z ${!reqiured_env} ]]; then
-                    >&2 echo "$entry_prompt environment value $required_env doesn't exist. program exit."
+                    info "environment value $required_env doesn't exist. program exit."
                     exit 2
                 fi
             done
@@ -145,7 +149,7 @@ case ${1} in
         elif [[ $DOCKER_USER ]]; then
             # assert: user exist in passwd
             if [[ ! `getent passwd $DOCKER_USER` ]]; then
-                >&2 echo "$entry_prompt ERROR: user=$DOCKER_USER not found in passwd. exit." ; 
+                info "ERROR: user=$DOCKER_USER not found in passwd. exit." ; 
                 exit
             fi
             export DOCKER_UID=`id -u $DOCKER_USER`
@@ -156,7 +160,7 @@ case ${1} in
             export DOCKER_USER=root
             export DOCKER_UID=0
             if [[ $DOCKER_GID ]] && [[ $DOCKER_GID != 0 ]]; then
-                >&2 echo "$entry_prompt ERROR: only set DOCKER_GID=$DOCKER_GID, but DOCKER_USER or DOCKER_UID not found. exit."   
+                info "ERROR: only set DOCKER_GID=$DOCKER_GID, but DOCKER_USER or DOCKER_UID not found. exit."   
             else
                 export DOCKER_GID=0
             fi
@@ -169,7 +173,7 @@ case ${1} in
 
         # init volume data
         if [[ -f $VOLUMES_ARCHIVE ]] && [[ $ENABLE_INIT_VOLUMES_DATA == true ]] && [[ $HAVE_INITIALIZED == false ]]; then
-            echo "$entry_prompt init volume data"
+            info "init volume data"
             cat $VOLUMES_LIST |
             while read volume; do
                 # empty directory or directory not exist
@@ -185,7 +189,7 @@ case ${1} in
 
         # patch file; apply template
         if [[ -d $ROOTFS_DIR ]] && [[ $ENABLE_ROOTFS == true ]]; then
-            echo "$entry_prompt patch template files"
+            info "patch template files"
             cd $ROOTFS_DIR
 
             find . -mindepth 1 -type d | 
@@ -219,14 +223,14 @@ case ${1} in
 
         # fix file mode
         if [[ -f $CHMOD_FILE ]] && [[ $ENABLE_CHMOD_FIX == true ]]; then
-            echo "$entry_prompt fix file mode"
+            info "fix file mode"
             cat $CHMOD_FILE | awk '{ printf("[[ -e %s ]] && chmod %s %s\n",$4,$1,$4); }' | bash
             cat $CHMOD_FILE | awk '{ printf("[[ -e %s ]] && chown %s:%s %s\n",$4,$2,$3,$4); }' | bash
         fi
 
         # pre-running script
         if [[ -f $PRE_RUN_SCRIPT ]] && [[ $ENABLE_PRE_RUN_SCRIPT == true ]]; then
-            echo "$entry_prompt pre-run script"
+            info "pre-run script"
             $PRE_RUN_SCRIPT
         fi
 
@@ -254,14 +258,14 @@ case ${1} in
         fi
 
         # run main program
-        echo "$entry_prompt running main program(UID=$docker_uid GID=$docker_gid USER=$docker_user)"
+        info "running main program(UID=$docker_uid GID=$docker_gid USER=$docker_user)"
         cd $pwd_orig
         if [[ $1 == run ]]; then
             shift
             if [[ -f $run_script ]]; then
                 cmd="exec $run_script $@"
             else
-                >&2 echo "$entry_prompt ERROR: run script not exist. exit."
+                info "ERROR: run script not exist. exit."
             fi
         else
             cmd=`echo $@`
