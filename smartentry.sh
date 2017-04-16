@@ -201,7 +201,7 @@ case ${1} in
             find . -type f | 
             while read file; do
                 file_dst=${file#*.}
-                if [[ $ENABLE_KEEP_USER_MODIFICATION ]]; then
+                if [[ $ENABLE_KEEP_USER_MODIFICATION == true ]]; then
                     [[ -f $CHECKLIST_FILE ]] && cat $CHECKLIST_FILE | grep $file_dst | md5sum -c 2> /dev/null | grep 'OK$' > /dev/null && cp $file $file_dst ;
                     [[ ! -f $file_dst ]] && cp $file $file_dst ;
                 else
