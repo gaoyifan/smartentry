@@ -9,6 +9,8 @@ if [[ $image == ubuntu ]]; then
     echo $tag | grep -q '-' && exit
 elif [[ $image == archlinux ]]; then
     echo $tag | grep -q '-' && exit
+elif [[ $image == debian ]]; then
+    echo $tag | grep -qP -- '-\d{8}' && exit
 elif [[ $image == fedora ]]; then
     EXTRA_CMD="RUN yum install -y tar && yum clean all"
 elif [[ $image == alpine ]]; then
