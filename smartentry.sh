@@ -24,7 +24,7 @@ if [[ -f $ENV_FILE ]]; then
                 required_envs+=($env_name)
             else
                 if [[ $ENABLE_OVERRIDE_ENV == true ]] || [[ -z ${!env_name} ]]; then
-                    export $env_name=$env_value
+                    export $env_name="${env_value}"
                 fi
             fi
         fi
