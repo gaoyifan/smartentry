@@ -16,6 +16,7 @@ addons:
   apt:
     packages:
     - parallel
+    - jq
 before_script:
   - curl -L https://github.com/grammarly/rocker/releases/download/${ROCKER_VERSION}/rocker_linux_amd64.tar.gz | sudo tar -C /usr/bin -xzf -
 script:

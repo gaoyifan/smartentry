@@ -5,11 +5,13 @@ BASEDIR=$(dirname $0)
 docker_tags () {
     echo $1 | grep -q '/' && image=$1 || image=library/$1
     tags_js=$(curl -sSL "https://registry.hub.docker.com/v2/repositories/${image}/tags/")
-    grep -oP '(?<="name": ").+?(?=")' <(echo $tags_js)
-    while next_page=$(grep -oP '(?<="next": ").+?(?=")' <(echo $tags_js) )
+    jq -r '.results[].name' <(echo $tags_js)
+    next_page=$(jq -r '.next' <(echo $tags_js) )
+    while [[ $next_page ]] && [[ $next_page != null ]]
     do
         tags_js=$(curl -sSL $next_page)
-        grep -oP '(?<="name": ").+?(?=")' <(echo $tags_js)
+        jq -r '.results[].name' <(echo $tags_js)
+        next_page=$(jq -r '.next' <(echo $tags_js) )
     done
 }
 
