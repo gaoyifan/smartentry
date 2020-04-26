@@ -17,7 +17,8 @@ elif [[ $image == alpine ]]; then
     EXTRA_CMD="RUN apk --update add bash tar && rm -rf /var/cache/apk/*"
 fi
 
-rocker build -f <(cat << EOF
+dockerfile=$(mktemp)
+cat << EOF > $dockerfile
 FROM $source_image:$tag
 LABEL maintainer "Yifan Gao <docker@yfgao.com>"
 ENV ASSETS_DIR="/opt/smartentry/HEAD"
@@ -25,9 +26,8 @@ $EXTRA_CMD
 COPY smartentry.sh /sbin/smartentry.sh
 ENTRYPOINT ["/sbin/smartentry.sh"]
 CMD ["run"]
-PUSH smartentry/$image:$tag
 EOF
-) .
+docker build -f $dockerfile -t smartentry/$image:$tag .
 docker tag smartentry/$image:$tag smartentry/$image:$tag$version
 [[ $SKIP_PUSH == true ]] || docker push smartentry/$image:$tag
 [[ $SKIP_PUSH == true ]] || docker push smartentry/$image:$tag$version
