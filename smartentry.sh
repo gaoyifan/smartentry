@@ -58,7 +58,7 @@ export ENABLE_FIX_OWNER_OF_VOLUMES=${ENABLE_FIX_OWNER_OF_VOLUMES:-"false"}
 export ENABLE_FIX_OWNER_OF_VOLUMES_DATA=${ENABLE_FIX_OWNER_OF_VOLUMES_DATA:-"false"}
 export ENABLE_MANDATORY_CHECK_ENV=${ENABLE_MANDATORY_CHECK_ENV:-"true"}
 
-function patch_rootfs(){
+function patch_rootfs {
     cd $PATCH_DIR
     find . -type f -o -type f |
     while read file; do
@@ -77,7 +77,7 @@ case ${1} in
 
         set +e
 
-        # generate MD5 list for target files of rootfs, to keep user's modification when docker restart 
+        # generate MD5 list for target files of rootfs, to keep user's modification when docker restart
         if [[ $ENABLE_ROOTFS == true ]] && [[ -d $ROOTFS_DIR ]] && [[ $ENABLE_KEEP_USER_MODIFICATION == true ]] ; then
             info "generate MD5 list"
             cd $ROOTFS_DIR
@@ -91,7 +91,7 @@ case ${1} in
         # chmod for rootfs
         if [[ -d $ROOTFS_DIR ]] && [[ $ENABLE_CHMOD_AUTO_FIX == true ]]; then
             info "chmod for rootfs"
-            cd $ROOTFS_DIR 
+            cd $ROOTFS_DIR
             find . -type f -o -type d |
             while read file; do
                 file_dst=${file#*.} ;
@@ -152,7 +152,7 @@ case ${1} in
         # set env: DOCKER_UID, DOCKER_GID, DOCKER_USER
         if [[ $DOCKER_UID ]]; then
             # UID exist in passwd
-            if [[ `getent passwd $DOCKER_UID` ]] ; then 
+            if [[ `getent passwd $DOCKER_UID` ]] ; then
                 export DOCKER_USER=`getent passwd $DOCKER_UID | cut -d: -f1`
                 export DOCKER_GID=`getent passwd $DOCKER_UID | cut -d: -f4`
                 export DOCKER_HOME=`getent passwd $DOCKER_UID | cut -d: -f6`
@@ -165,7 +165,7 @@ case ${1} in
         elif [[ $DOCKER_USER ]]; then
             # assert: user exist in passwd
             if [[ ! `getent passwd $DOCKER_USER` ]]; then
-                info "ERROR: user=$DOCKER_USER not found in passwd. exit." ; 
+                info "ERROR: user=$DOCKER_USER not found in passwd. exit." ;
                 exit
             fi
             export DOCKER_UID=`id -u $DOCKER_USER`
@@ -176,7 +176,7 @@ case ${1} in
             export DOCKER_USER=root
             export DOCKER_UID=0
             if [[ $DOCKER_GID ]] && [[ $DOCKER_GID != 0 ]]; then
-                info "ERROR: only set DOCKER_GID=$DOCKER_GID, but DOCKER_USER or DOCKER_UID not found. exit."   
+                info "ERROR: only set DOCKER_GID=$DOCKER_GID, but DOCKER_USER or DOCKER_UID not found. exit."
             else
                 export DOCKER_GID=0
             fi
@@ -208,13 +208,13 @@ case ${1} in
             info "apply template files"
             cd $ROOTFS_DIR
 
-            find . -mindepth 1 -type d | 
-            while read dir; do 
-                mkdir -p ${dir#*.} ; 
+            find . -mindepth 1 -type d |
+            while read dir; do
+                mkdir -p ${dir#*.} ;
             done
 
             TEMPLATE_VARIABLES=$(find . -type f -exec grep -o '{{[A-Za-z0-9_]\+}}' {} \; | awk -vRS='}}' '{gsub(/.*\{\{/,"");print}' | xargs -n 1 echo | sort | uniq)
-            find . -type f | 
+            find . -type f |
             while read file; do
                 file_dst=${file#*.}
                 if [[ $ENABLE_KEEP_USER_MODIFICATION == true ]]; then
@@ -223,7 +223,7 @@ case ${1} in
                 else
                     cp $file $file_dst ;
                 fi
-                [[ -n $TEMPLATE_VARIABLES ]] && echo $TEMPLATE_VARIABLES | xargs -n 1 echo | 
+                [[ -n $TEMPLATE_VARIABLES ]] && echo $TEMPLATE_VARIABLES | xargs -n 1 echo |
                 while read variable; do
                     variable_literal=$(echo ${!variable} | sed 's:/:\\/:g')
                     sed -i "s/{{$variable}}/$variable_literal/g" $file_dst ;
@@ -269,7 +269,7 @@ case ${1} in
             shlvl_orig=$SHLVL
 
             for i in $(env | awk -F"=" '{print $1}') ; do
-                unset $i; 
+                unset $i;
             done
 
             export TERM=$term_orig
