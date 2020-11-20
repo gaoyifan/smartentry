@@ -32,6 +32,8 @@ if [[ -f $ENV_FILE ]]; then
 fi
 
 export ROOTFS_DIR=${ROOTFS_DIR:-"$ASSETS_DIR/rootfs"}
+export PATCH_DIR=${PATCH_DIR:-"$ASSETS_DIR/patch"}
+export PATCH_MODE=${PATCH_MODE:-"buildtime"} # runtime/buildtime
 export CHECKLIST_FILE=${CHECKLIST_FILE:-"$ASSETS_DIR/checklist.md5"}
 export PRE_ENTRY_SCRIPT=${PRE_ENTRY_SCRIPT:-"$ASSETS_DIR/pre-entry.sh"}
 export CHMOD_FILE=${CHMOD_FILE:-"$ASSETS_DIR/chmod.list"}
@@ -47,6 +49,7 @@ export ENABLE_KEEP_USER_MODIFICATION=${ENABLE_KEEP_USER_MODIFICATION:-"true"}
 export ENABLE_CHMOD_AUTO_FIX=${ENABLE_CHMOD_AUTO_FIX:-"true"}
 export ENABLE_INIT_VOLUMES_DATA=${ENABLE_INIT_VOLUMES_DATA:-"true"}
 export ENABLE_ROOTFS=${ENABLE_ROOTFS:-"true"}
+export ENABLE_PATCH=${ENABLE_PATCH:-"true"}
 export ENABLE_CHMOD_FIX=${ENABLE_CHMOD_FIX:-"true"}
 export ENABLE_UNSET_ENV_VARIBLES=${ENABLE_UNSET_ENV_VARIBLES:-"true"}
 export ENABLE_PRE_RUN_SCRIPT=${ENABLE_PRE_RUN_SCRIPT:-"true"}
@@ -55,6 +58,14 @@ export ENABLE_FIX_OWNER_OF_VOLUMES=${ENABLE_FIX_OWNER_OF_VOLUMES:-"false"}
 export ENABLE_FIX_OWNER_OF_VOLUMES_DATA=${ENABLE_FIX_OWNER_OF_VOLUMES_DATA:-"false"}
 export ENABLE_MANDATORY_CHECK_ENV=${ENABLE_MANDATORY_CHECK_ENV:-"true"}
 
+function patch_rootfs(){
+    cd $PATCH_DIR
+    find . -type f -o -type f |
+    while read file; do
+        file_dst=${file#*.} ;
+        patch $file_dst $file
+    done
+}
 
 case ${1} in
     build)
@@ -88,6 +99,11 @@ case ${1} in
             done
             [[ -f ${CHMOD_FILE} ]] && cat ${CHMOD_FILE} >> ${CHMOD_FILE}.add
             [[ -f ${CHMOD_FILE}.add ]] && mv ${CHMOD_FILE}.add ${CHMOD_FILE}
+        fi
+
+        # build-time patch
+        if [[ -d $PATCH_DIR ]] && [[ $ENABLE_PATCH == true ]] && [[ $PATCH_MODE == "buildtime" ]]; then
+            patch_rootfs
         fi
 
         # save volume data
@@ -187,9 +203,9 @@ case ${1} in
             done
         fi
 
-        # patch file; apply template
+        # apply template
         if [[ -d $ROOTFS_DIR ]] && [[ $ENABLE_ROOTFS == true ]]; then
-            info "patch template files"
+            info "apply template files"
             cd $ROOTFS_DIR
 
             find . -mindepth 1 -type d | 
@@ -219,6 +235,11 @@ case ${1} in
                 link_dst=${link#*.}
                 cp -d $link $link_dst
             done
+        fi
+
+        # run-time patch
+        if [[ -d $PATCH_DIR ]] && [[ $ENABLE_PATCH == true ]] && [[ $PATCH_MODE == "runtime" ]]; then
+            patch_rootfs
         fi
 
         # fix file mode
