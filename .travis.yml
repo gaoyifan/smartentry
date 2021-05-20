@@ -1,6 +1,12 @@
+language: shell
+
+arch:
+  - amd64
+  - arm64
+
 services:
     - docker
-language: shell
+
 env:
   global:
     - SKIP_REMOVE=true
@@ -11,10 +17,12 @@ env:
     - IMAGE=fedora
     - IMAGE=ubuntu
     - IMAGE=archlinux SOURCE_IMAGE=pritunl/archlinux
+
 addons:
   apt:
     packages:
     - parallel
     - jq
+
 script:
   - ./travis-helpers/build.sh
