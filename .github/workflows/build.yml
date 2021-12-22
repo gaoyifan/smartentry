@@ -19,9 +19,13 @@ jobs:
           - image: alpine
             platform: linux/amd64,linux/arm64
           - image: centos
+            platform: linux/amd64,linux/arm64
           - image: debian
+            platform: linux/amd64,linux/arm64
           - image: fedora
+            platform: linux/amd64,linux/arm64
           - image: ubuntu
+            platform: linux/amd64,linux/arm64
           - image: archlinux
             platform: linux/amd64
 

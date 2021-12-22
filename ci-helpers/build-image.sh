@@ -2,7 +2,8 @@
 
 image=$1
 tag=$2
-source_image=${3:-$image}
+platform=$3
+source_image=${4:-$image}
 version=$(git tag --contains | tr 'v' '-')
 
 if [[ $image == ubuntu ]]; then
@@ -31,12 +32,12 @@ EOF
 cd $workdir
 docker buildx build \
     -t smartentry/$image:$tag \
-    --platform linux/amd64,linux/arm64 \
+    --platform $platform \
     $DOCKER_PUSH .
 
 [[ -n $version ]] && docker buildx build \
     -t smartentry/$image:$tag$version \
-    --platform linux/amd64,linux/arm64 \
+    --platform $platform \
     $DOCKER_PUSH .
 
 [[ $SKIP_REMOVE == true ]] || docker buildx prune -a -f

@@ -1,8 +1,5 @@
 #!/bin/bash
 
-env
-exit
-
 BASEDIR=$(dirname $0)
 
 docker_tags () {
@@ -19,5 +16,5 @@ docker_tags () {
 }
 
 [[ -z $SKIP_LOGIN ]] && docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
-docker_tags ${SOURCE_IMAGE:-$IMAGE} | parallel --retries 3 -j 8 $BASEDIR/build-image.sh $IMAGE {} $SOURCE_IMAGE
+docker_tags ${SOURCE_IMAGE:-$IMAGE} | parallel --retries 3 -j 8 $BASEDIR/build-image.sh $IMAGE {} $PLATFORM $SOURCE_IMAGE
 
