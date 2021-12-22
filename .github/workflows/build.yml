@@ -17,11 +17,17 @@ jobs:
       matrix:
         include:
           - image: alpine
+            platform: linux/amd64,linux/arm64
           - image: centos
+            platform: linux/amd64,linux/arm64
           - image: debian
+            platform: linux/amd64,linux/arm64
           - image: fedora
+            platform: linux/amd64,linux/arm64
           - image: ubuntu
+            platform: linux/amd64,linux/arm64
           - image: archlinux
+            platform: linux/amd64
 
     steps:
       - uses: actions/checkout@v2
@@ -32,6 +38,7 @@ jobs:
       - run: ./ci-helpers/build.sh
         env:
           IMAGE: ${{ matrix.image }}
+          PLATFORM: ${{ matrix.platform }}
           SOURCE_IMAGE: ${{ matrix.source_image }}
           SKIP_REMOVE: false
           DOCKER_PUSH: "${{ github.ref == 'refs/heads/master' && '--push' || '' }}"
