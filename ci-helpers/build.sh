@@ -1,5 +1,8 @@
 #!/bin/bash
 
+env
+exit
+
 BASEDIR=$(dirname $0)
 
 docker_tags () {

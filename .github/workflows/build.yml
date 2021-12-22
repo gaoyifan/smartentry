@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        platform: linux/amd64,linux/arm64
         include:
           - image: alpine
           - image: centos
@@ -22,6 +23,7 @@ jobs:
           - image: fedora
           - image: ubuntu
           - image: archlinux
+            platform: linux/amd64
 
     steps:
       - uses: actions/checkout@v2
@@ -32,6 +34,7 @@ jobs:
       - run: ./ci-helpers/build.sh
         env:
           IMAGE: ${{ matrix.image }}
+          PLATFORM: ${{ matrix.platform }}
           SOURCE_IMAGE: ${{ matrix.source_image }}
           SKIP_REMOVE: false
           DOCKER_PUSH: "${{ github.ref == 'refs/heads/master' && '--push' || '' }}"
