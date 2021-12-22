@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: linux/amd64,linux/arm64
+        platform: "linux/amd64,linux/arm64"
         include:
           - image: alpine
           - image: centos
