@@ -13,34 +13,33 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - image: alpine
-            platform: linux/amd64,linux/arm64
-          - image: centos
-            platform: linux/amd64,linux/arm64
-          - image: debian
-            platform: linux/amd64,linux/arm64
-          - image: fedora
-            platform: linux/amd64,linux/arm64
-          - image: ubuntu
-            platform: linux/amd64,linux/arm64
-          - image: archlinux
-            platform: linux/amd64
 
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 50
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          pip install -e .[dev]
+      - name: Run unit tests
+        run: |
+          pytest -q
       - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
-      - run: ./ci-helpers/build.sh
+      - name: Build smartentry images
         env:
-          IMAGE: ${{ matrix.image }}
-          PLATFORM: ${{ matrix.platform }}
-          SOURCE_IMAGE: ${{ matrix.source_image }}
+          # Global budget: keep headroom for other pulls by setting < 100
+          PULL_BUDGET: 90
+          IMAGES: alpine,centos,debian,fedora,ubuntu,archlinux
+          # Map default platforms for each image (can be overridden)
+          PLATFORM_MAP_JSON: >-
+            {"alpine":"linux/amd64,linux/arm64","centos":"linux/amd64,linux/arm64","debian":"linux/amd64,linux/arm64","fedora":"linux/amd64,linux/arm64","ubuntu":"linux/amd64,linux/arm64","archlinux":"linux/amd64"}
           SKIP_REMOVE: false
-          DOCKER_PUSH: "${{ github.ref == 'refs/heads/master' && '--push' || '' }}"
+          DOCKER_PUSH: "${{ github.ref == 'refs/heads/master' && 'true' || '' }}"
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
           DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
+        run: |
+          smartentry-build
