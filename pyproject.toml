@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "smartentry-ci"
+version = "0.1.0"
+description = "Smartentry differential Docker image builder"
+requires-python = ">=3.9"
+dependencies = [
+  "requests>=2.31.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0.0",
+]
+
+[tool.setuptools]
+packages = ["smartentry_build"]
+
+[project.scripts]
+smartentry-build = "smartentry_build.cli:main"
+
+
