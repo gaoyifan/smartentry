@@ -44,29 +44,36 @@ def docker_login(username: Optional[str], password: Optional[str], skip_login: b
     subprocess.run(["docker", "login", "-u", username, "--password-stdin"], input=password.encode(), check=True)
 
 
-def build_one(image: str, tag: str, platforms: str, source_image: Optional[str], push: bool, prune: bool) -> None:
-    base_image = source_image or image
+def generate_dockerfile(image: str, tag: str, base_image: str) -> str:
     extra_cmd = ""
     if image == "fedora":
-        extra_cmd = "RUN yum install -y tar && yum clean all"
+        extra_cmd = "RUN dnf -y install tar && dnf clean all"
     elif image == "alpine":
         extra_cmd = "RUN apk --update add bash tar && rm -rf /var/cache/apk/*"
+    parts = [
+        f"FROM {base_image}:{tag}",
+        'LABEL maintainer="Yifan Gao <docker@yfgao.com>"',
+        'ENV ASSETS_DIR="/opt/smartentry/HEAD"',
+    ]
+    if extra_cmd:
+        parts.append(extra_cmd)
+    parts.extend([
+        "COPY smartentry.sh /sbin/smartentry.sh",
+        'ENTRYPOINT ["/sbin/smartentry.sh"]',
+        'CMD ["run"]',
+    ])
+    return "\n".join(parts)
 
+
+def build_one(image: str, tag: str, platforms: str, source_image: Optional[str], push: bool, prune: bool) -> None:
+    base_image = source_image or image
     version_suffix = get_git_version_suffix()
     workdir = tempfile.mkdtemp(prefix="smartentry-build-")
     try:
         repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
         shutil.copy2(os.path.join(repo_root, "smartentry.sh"), os.path.join(workdir, "smartentry.sh"))
 
-        dockerfile = f"""
-FROM {base_image}:{tag}
-LABEL maintainer "Yifan Gao <docker@yfgao.com>"
-ENV ASSETS_DIR="/opt/smartentry/HEAD"
-{extra_cmd}
-COPY smartentry.sh /sbin/smartentry.sh
-ENTRYPOINT ["/sbin/smartentry.sh"]
-CMD ["run"]
-""".strip()
+        dockerfile = generate_dockerfile(image=image, tag=tag, base_image=base_image)
         with open(os.path.join(workdir, "Dockerfile"), "w") as f:
             f.write(dockerfile + "\n")
 
