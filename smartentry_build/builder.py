@@ -47,7 +47,11 @@ def docker_login(username: Optional[str], password: Optional[str], skip_login: b
 def generate_dockerfile(image: str, tag: str, base_image: str) -> str:
     extra_cmd = ""
     if image == "fedora":
-        extra_cmd = "RUN dnf -y install tar && dnf clean all"
+        extra_cmd = (
+            "RUN (command -v dnf >/dev/null 2>&1 && dnf -y install tar && dnf clean all) || "
+            "(command -v yum >/dev/null 2>&1 && yum install -y tar && yum clean all) || "
+            "(command -v microdnf >/dev/null 2>&1 && microdnf -y install tar && microdnf clean all) || true"
+        )
     elif image == "alpine":
         extra_cmd = "RUN apk --update add bash tar && rm -rf /var/cache/apk/*"
     parts = [
