@@ -8,7 +8,7 @@ on:
 
   workflow_dispatch:
   schedule:
-    - cron: '45 2 * * 0'
+    - cron: '7 * * * *'
 
 jobs:
   build:
@@ -38,7 +38,7 @@ jobs:
           PLATFORM_MAP_JSON: >-
             {"alpine":"linux/amd64,linux/arm64","centos":"linux/amd64,linux/arm64","debian":"linux/amd64,linux/arm64","fedora":"linux/amd64,linux/arm64","ubuntu":"linux/amd64,linux/arm64","archlinux":"linux/amd64"}
           SKIP_REMOVE: false
-          DOCKER_PUSH: "${{ github.ref == 'refs/heads/master' && 'true' || '' }}"
+          DOCKER_PUSH: "${{ (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/ci') && 'true' || '' }}"
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
           DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
         run: |
