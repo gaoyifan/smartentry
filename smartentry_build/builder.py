@@ -107,7 +107,24 @@ def decide_builds(
         ours_time = ours_index.get(tag)
         if ours_time and upstream_time and ours_time >= upstream_time:
             continue
-        candidates.append((image, tag, platforms, upstream_time, ours_time))
+        # Intersect requested platforms with upstream-supported architectures
+        req_archs = [p.split("/")[-1] for p in platforms.split(",") if p]
+        supported = set()
+        for a in tag_info.architectures:
+            # normalize 386 vs i386 naming: docker uses 386
+            supported.add("386" if a == "i386" else a)
+        allowed_platforms = []
+        for p in platforms.split(","):
+            p = p.strip()
+            if not p:
+                continue
+            arch = p.split("/")[-1]
+            if arch in supported:
+                allowed_platforms.append(p)
+        if not allowed_platforms:
+            continue
+        eff_platforms = ",".join(allowed_platforms)
+        candidates.append((image, tag, eff_platforms, upstream_time, ours_time))
     candidates.sort(key=lambda x: x[3] or dt.datetime.fromtimestamp(0, tz=dt.timezone.utc), reverse=True)
     return candidates[:max_builds]
 

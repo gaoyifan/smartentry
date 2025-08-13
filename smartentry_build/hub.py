@@ -1,6 +1,6 @@
 import datetime as dt
 from dataclasses import dataclass
-from typing import Iterator, Optional
+from typing import Iterator, Optional, Set
 
 import requests
 
@@ -12,6 +12,7 @@ DOCKER_HUB_API = "https://registry.hub.docker.com/v2/repositories"
 class TagInfo:
     name: str
     tag_last_pushed: Optional[dt.datetime]
+    architectures: Set[str]
 
 
 class DockerHubClient:
@@ -37,9 +38,15 @@ class DockerHubClient:
             resp.raise_for_status()
             data = resp.json()
             for r in data.get("results", []):
+                archs: Set[str] = set()
+                for img in r.get("images", []) or []:
+                    arch = (img or {}).get("architecture")
+                    if arch and arch != "unknown":
+                        archs.add(arch)
                 yield TagInfo(
                     name=r.get("name", ""),
                     tag_last_pushed=self._parse_time(r.get("tag_last_pushed") or r.get("last_updated")),
+                    architectures=archs,
                 )
             url = data.get("next")
 

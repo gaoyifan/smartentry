@@ -3,18 +3,22 @@ from smartentry_build import builder as build
 
 
 class DummyHub:
-    def __init__(self, upstream_tags, ours_tags):
+    def __init__(self, upstream_tags, ours_tags, upstream_archs=None):
         # dict tag->tag_last_pushed iso str
         self.upstream_tags = upstream_tags
         self.ours_tags = ours_tags
+        self.upstream_archs = upstream_archs or {}
 
     def iter_tags(self, repo):
         if str(repo).startswith("smartentry/"):
             items = self.ours_tags.items()
+            for name, ts in items:
+                yield build.TagInfo(name=name, tag_last_pushed=dt.datetime.fromisoformat(ts), architectures=set())
         else:
             items = self.upstream_tags.items()
-        for name, ts in items:
-            yield build.TagInfo(name=name, tag_last_pushed=dt.datetime.fromisoformat(ts))
+            for name, ts in items:
+                archs = set(self.upstream_archs.get(name, {"amd64", "arm64"}))
+                yield build.TagInfo(name=name, tag_last_pushed=dt.datetime.fromisoformat(ts), architectures=archs)
 
     def get_single_tag(self, repo, tag):
         ts = self.ours_tags.get(tag)
@@ -45,6 +49,10 @@ def test_decide_builds_differential_logic():
             "bookworm": "2025-08-12T09:00:00+00:00",  # older -> should build
             "stable": "2025-08-13T10:00:00+00:00",    # newer or equal -> skip
         },
+        upstream_archs={
+            "bookworm": {"amd64", "arm64"},
+            "stable": {"amd64", "arm64"},
+        }
     )
     cands = build.decide_builds(
         hub=hub,
