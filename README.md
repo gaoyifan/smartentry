@@ -1,6 +1,6 @@
 # Smartentry
 
-Smartentry is a generic, batteries-included Docker entrypoint implemented as a single shell script: `smartentry.sh`. It assembles your container at runtime from an "assets" directory, with safe environment loading, templating, patching, volume initialization, and permission reconciliation.
+Smartentry is a generic, batteries-included Docker entrypoint implemented as a single shell script: `smartentry.sh`. It assembles your container at runtime from an "assets" directory, with templating, patching, volume initialization, and permission reconciliation.
 
 - License: MIT (see `LICENSE`)
 - Main program: `smartentry.sh`
@@ -13,7 +13,7 @@ Smartentry is a generic, batteries-included Docker entrypoint implemented as a s
 At container start, Smartentry can:
 - Load environment variables from an `env` file (with optional overrides) and verify required ones.
 - Materialize a `rootfs/` template into `/`, with variable substitution of `{{VARNAME}}` from the environment.
-- Apply patches from `patch/` either at build-time or runtime.
+- Apply `patch`/diff files from `patch/` either at build-time or runtime.
 - Initialize persistent volumes from an archive on first run and optionally fix ownership.
 - Reconcile file modes and ownership based on a captured `chmod.list`.
 - Run optional hooks before templating and before executing your main process.
@@ -64,7 +64,7 @@ This repository publishes pre-built images via GitHub Actions (see `.github/work
 
 - `env`: environment configuration (see next sections)
 - `rootfs/`: template tree copied to `/` (with templating)
-- `patch/`: files applied on top of `/` (build-time or runtime)
+- `patch/`: unified diff files applied on top of `/` (build-time or runtime)
 - `pre-entry.sh`: sourced prior to templating
 - `pre-run`: executed just before the main program
 - `run`: main program invoked by `CMD ["run"]`
@@ -128,10 +128,23 @@ Tip: You can provide `.env`-style files via bind mount to `$ASSETS_DIR/env`.
 
 ## Patching (build-time vs runtime)
 
-- Place files in `patch/` mirroring their absolute destination paths (e.g., `patch/etc/myapp/conf.d/foo.conf`).
+- Store GNU `patch`-compatible diffs under `patch/`, using destination paths relative to `/`. Smartentry runs `patch <destination> <diff-file>` for each file, so the diff must describe how to transform the existing destination file.
 - Choose when to apply with `PATCH_MODE`:
   - `buildtime`: applied by `smartentry.sh build`
   - `runtime`: applied on every container start
+- Example layout:
+
+  ```
+  patch/
+    etc/myapp/config.yaml.diff
+    usr/local/bin/tool.sh.patch
+  ```
+
+- To create a diff from a modified file:
+
+  ```bash
+  diff -u /etc/myapp/config.yaml new-config.yaml > patch/etc/myapp/config.yaml.diff
+  ```
 
 ## Preserving user modifications (checksums)
 
