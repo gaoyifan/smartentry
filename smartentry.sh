@@ -141,7 +141,7 @@ case ${1} in
         if [[ $ENABLE_MANDATORY_CHECK_ENV == true ]] && [[ ${#required_envs[@]} != 0 ]]; then
             info "checking required environment variables"
             for required_env in ${required_envs[@]}; do
-                if [[ -z ${!reqiured_env} ]]; then
+                if [[ -z ${!required_env} ]]; then
                     info "environment value $required_env doesn't exist. program exit."
                     exit 2
                 fi
