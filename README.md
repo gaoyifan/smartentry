@@ -1,5 +1,16 @@
 # Smartentry
 
+<!-- Keep these links. Translations will automatically update with the README. -->
+[Deutsch](https://zdoc.app/de/gaoyifan/smartentry) | 
+[English](https://zdoc.app/en/gaoyifan/smartentry) | 
+[Español](https://zdoc.app/es/gaoyifan/smartentry) | 
+[français](https://zdoc.app/fr/gaoyifan/smartentry) | 
+[日本語](https://zdoc.app/ja/gaoyifan/smartentry) | 
+[한국어](https://zdoc.app/ko/gaoyifan/smartentry) | 
+[Português](https://zdoc.app/pt/gaoyifan/smartentry) | 
+[Русский](https://zdoc.app/ru/gaoyifan/smartentry) | 
+[中文](https://zdoc.app/zh/gaoyifan/smartentry)
+
 Smartentry is a generic, batteries-included Docker entrypoint implemented as a single shell script: `smartentry.sh`. It assembles your container at runtime from an "assets" directory, with templating, patching, volume initialization, and permission reconciliation.
 
 - License: MIT (see `LICENSE`)
