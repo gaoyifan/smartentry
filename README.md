@@ -239,6 +239,10 @@ Use this to reduce accidental leakage of build-time secrets into runtime.
 | `DOCKER_USER` |
 | `DOCKER_HOME` |
 
+## Example projects
+
+- Browse real-world usages of Smartentry images: [GitHub search](https://github.com/search?q=%2F%5EFROM+smartentry%2F+path%3A**%2FDockerfile)
+
 ## Maintenance note: CI helper
 
 For repository maintainers, a small Python helper (`smartentry-build`) orchestrates differential multi-arch builds in CI. It is used by the GitHub Action defined in `.github/workflows/build.yml`. End-users of `smartentry.sh` do not need this helper.
